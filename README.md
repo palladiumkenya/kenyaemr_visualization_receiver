@@ -1,10 +1,4 @@
-# ushauri apis
 
-Apis for ushauri mobile application
-
-[![deploy to test instance](https://github.com/palladiumkenya/ushauri_api/actions/workflows/cicd_process.yml/badge.svg)](https://github.com/palladiumkenya/ushauri_api/actions/workflows/cicd_process.yml)
-
----
 ## Requirements
 
 For development, you will only need Node.js and a node global package, Yarn or npm installed in your environement.
@@ -47,7 +41,7 @@ If you need to update `npm`, you can make it using `npm`! Cool right? After runn
 
 ## Install
 
-    $ git clone https://github.com/mHealthKenya/ushauri_api.git
+    $ git clone 
     $ cd ushauri_api
     $ yarn install
     Or for npm
@@ -64,15 +58,7 @@ create `.env` then edit it with your environment variable. use `.env.save` as a 
 ## Or for npm. Running the project
 
     $ npm start
-## docker option
-
-* Create a image using 
- ```sh
-  docker build -t ushauri_api:latest .
- ```
- * Run the image creates
- ```sh
-    docker run -p 7002:5000 --name ushauri_api -d --restart always ushauri_api:latest        
+     
  ```
  * Access the service via [localhost](http://127.0.0.1:7002)
  * stoping the service use
