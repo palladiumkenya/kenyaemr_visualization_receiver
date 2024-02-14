@@ -1,7 +1,7 @@
 {
-  "name": "ushauri_api",
+  "name": "KenyaEMR Data Visualizer",
   "version": "1.0.0",
-  "description": "Apis for ushauri mobile application",
+  "description": "REST Server for KenyaEMR 3.x Visualizer",
   "main": "index.js",
   "dependencies": {
     "accepts": "^1.3.8",
