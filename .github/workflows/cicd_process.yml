@@ -1,0 +1,38 @@
+name:  Test Instance Deployment
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to Test Instance
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Remote Connection Setup
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.CICD_SECRET }}
+        port: ${{ secrets.PORT }}
+        script: |
+          # Set up deployment directory
+          deploy_dir="/apps/github-workflows/mhealth-apps/ushauri_api"
+          sudo rm -rf "$deploy_dir"
+          sudo mkdir "$deploy_dir"
+          sudo chown -R cicd2:cicd2 "$deploy_dir"
+          
+          # Clone repository
+          git config --global --add safe.directory "$deploy_dir"
+          git clone -b main https://github.com/palladiumkenya/ushauri_api.git "$deploy_dir"
+          
+          # Copy configuration files
+          cp /apps/configs/ushauri_api/.env "$deploy_dir/"
+          
+          # Build and run Docker container
+          docker stop ushauri_api || true
+          docker rm ushauri_api || true
+          docker build -t ushauri_api:latest "$deploy_dir"
+          docker run -p 7002:5000 --name ushauri_api -d --restart always ushauri_api:latest
