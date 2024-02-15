@@ -6,8 +6,7 @@ require("dotenv").config();
 const passport = require('passport');
 require('./passport-config')(passport);
 
-//const users = require("./routes/users");
-//const clients = require("./routes/clients");
+const receiver = require("./routes/receiver");
 
 // app.use(express.json());
 app.use(bodyParser.json());
@@ -17,7 +16,7 @@ app.use(bodyParser.urlencoded({
 
 
 //verify upi 
-//app.use('/mohupi',verifyupi);
+app.use('/superset',receiver);
 
 
 

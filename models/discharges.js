@@ -1,22 +1,23 @@
 const sequelize = require("../db_config");
 const Sequelize = require("sequelize");
 
-const SCounty = sequelize.sequelize.define(
-    "tbl_sub_county_upi", {
+const Discharges = sequelize.sequelize.define(
+    "discharges", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        name: Sequelize.TEXT,
-        value_upi: Sequelize.TEXT,
-        county_id: Sequelize.INTEGER,
-    }, {
+        time_stamp: Sequelize.TEXT,
+        mfl_code: Sequelize.INTEGER,
+        discharge_status: Sequelize.TEXT,
+        total: Sequelize.BIGINT,
+       }, {
         timestamps: true,
         paranoid: true,
         underscored: true,
         freezeTableName: true,
-        tableName: "tbl_sub_county_upi"
+        tableName: "discharges"
     }
 );
-exports.SCounty = SCounty;
+exports.Discharges = Discharges;
