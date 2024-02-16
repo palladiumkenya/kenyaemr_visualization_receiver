@@ -16,12 +16,15 @@ const {Visits} = require("../models/visits");
 const {Workload} = require("../models/workload");
 
 // Function to add a new element to each record in the JSON array
-function addNewElement(jsonData, mfl_code, time_stamp) {
-     jsonData.forEach(record => {
+function addNewElement(jsonData, mfl_code, time_stamp, timestamp_unix, pk_column) {
+     jsonData.forEach(
+       
+        record => {
         // Add a new key-value pair to each record
         record.time_stamp = time_stamp;
         record.mfl_code = mfl_code;
-
+        record.record_pk =  mfl_code+timestamp_unix+record.visit_type;
+       
       });
       return jsonData;
   }
@@ -34,7 +37,9 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
       transaction = await sequelize.sequelize.transaction();
   
       // Create multiple records within the transaction
-      const visits_created = await Visits.bulkCreate(visits_data, { transaction });
+      const visits_created = await Visits.bulkCreate(visits_data, {
+        updateOnDuplicate: ['total'] // Update the 'email' field if the username already exists
+      }, { transaction });
       const workload_created = await Workload.bulkCreate(workload_data, { transaction });
       const payments_created = await Payments.bulkCreate(payments_data, { transaction });
       const inventory_created = await Inventory.bulkCreate(inventory_data, { transaction });
@@ -60,6 +65,7 @@ router.post("/", async (req, res) => {
 var mfl_code=req.body.mfl_code;
 
 // Convert the UNIX timestamp to milliseconds
+const timestamp_unix = req.body.timestamp;
 const timestampMs = req.body.timestamp * 1000;
 
 // Create a new Date object using the timestamp in milliseconds
@@ -83,13 +89,13 @@ let facility_attributes = {
 //Admissions
 
 //Add Facility Attributes
-const visits = addNewElement(req.body.visits,mfl_code,timestamp);
-const workload = addNewElement(req.body.workload,mfl_code,timestamp);
-const payments = addNewElement(req.body.payments,mfl_code,timestamp);
-const inventory = addNewElement(req.body.inventory,mfl_code,timestamp);
-const diagnosis = addNewElement(req.body.diagnosis,mfl_code,timestamp);
-const billing = addNewElement(req.body.billing,mfl_code,timestamp);
-const admissions = addNewElement(req.body.bed_management,mfl_code,timestamp);
+const visits = addNewElement(req.body.visits,mfl_code,timestamp, timestamp_unix, 'visit_type');
+const workload = addNewElement(req.body.workload,mfl_code,timestamp, timestamp_unix, 'department');
+const payments = addNewElement(req.body.payments,mfl_code,timestamp, timestamp_unix, 'payment_mode');
+const inventory = addNewElement(req.body.inventory,mfl_code,timestamp, timestamp_unix,'item_name');
+const diagnosis = addNewElement(req.body.diagnosis,mfl_code,timestamp,timestamp_unix, 'diagnosis_name');
+const billing = addNewElement(req.body.billing,mfl_code,timestamp, timestamp_unix, 'service_type');
+const admissions = addNewElement(req.body.bed_management,mfl_code,timestamp, timestamp_unix, 'ward');
 
 
 
@@ -105,9 +111,7 @@ visualizer_records(facility_attributes, visits,workload, payments, inventory,dia
 
       }
     
-   // output=true
-
-           
+   // output=true           
   )
   .catch(
     facility_attributes => {

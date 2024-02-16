@@ -13,6 +13,10 @@ const Payments = sequelize.sequelize.define(
         payment_mode: Sequelize.TEXT,
         no_of_patients: Sequelize.INTEGER,
         amount_paid: Sequelize.BIGINT,
+        record_pk: {
+            type: Sequelize.STRING,
+            unique: true // Ensure uniqueness of usernames
+          },
        }, {
         timestamps: true,
         paranoid: true,

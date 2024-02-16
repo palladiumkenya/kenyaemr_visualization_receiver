@@ -15,6 +15,10 @@ const Billing = sequelize.sequelize.define(
         amount_due: Sequelize.BIGINT,
         amount_paid: Sequelize.BIGINT,
         balance_due: Sequelize.BIGINT,
+        record_pk: {
+            type: Sequelize.STRING,
+            unique: true // Ensure uniqueness of usernames
+          },
        }, {
         timestamps: true,
         paranoid: true,

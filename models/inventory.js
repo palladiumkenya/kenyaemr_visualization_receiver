@@ -15,6 +15,10 @@ const Inventory = sequelize.sequelize.define(
         unit_of_measure: Sequelize.TEXT,
         quantity_at_hand: Sequelize.BIGINT,
         quantity_consumed: Sequelize.BIGINT,
+        record_pk: {
+            type: Sequelize.STRING,
+            unique: true // Ensure uniqueness of usernames
+          },
        }, {
         timestamps: true,
         paranoid: true,

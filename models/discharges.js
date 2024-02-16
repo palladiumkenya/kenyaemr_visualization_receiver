@@ -12,6 +12,10 @@ const Discharges = sequelize.sequelize.define(
         mfl_code: Sequelize.INTEGER,
         discharge_status: Sequelize.TEXT,
         total: Sequelize.BIGINT,
+        record_pk: {
+            type: Sequelize.STRING,
+            unique: true // Ensure uniqueness of usernames
+          },
        }, {
         timestamps: true,
         paranoid: true,

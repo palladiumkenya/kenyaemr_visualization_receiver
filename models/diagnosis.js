@@ -12,6 +12,10 @@ const Diagnosis = sequelize.sequelize.define(
         mfl_code: Sequelize.INTEGER,
         diagnosis_name: Sequelize.TEXT,
         total: Sequelize.BIGINT,
+        record_pk: {
+            type: Sequelize.STRING,
+            unique: true // Ensure uniqueness of usernames
+          },
        }, {
         timestamps: true,
         paranoid: true,
