@@ -17,7 +17,7 @@ const Admissions = sequelize.sequelize.define(
         new_admissions: Sequelize.BIGINT,
         record_pk: {
             type: Sequelize.STRING,
-            unique: true // Ensure uniqueness of usernames
+            unique: true // Ensure uniqueness of record
           },
        }, {
         timestamps: true,

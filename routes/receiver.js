@@ -1,5 +1,6 @@
 const express = require("express");
 const sequelize = require("../db_config");
+const base64 = require("base64util");
 
 const router = express.Router();
 // const bcrypt = require("bcrypt");
@@ -23,7 +24,39 @@ function addNewElement(jsonData, mfl_code, time_stamp, timestamp_unix, pk_column
         // Add a new key-value pair to each record
         record.time_stamp = time_stamp;
         record.mfl_code = mfl_code;
-        record.record_pk =  mfl_code+timestamp_unix+record.visit_type;
+        //Generate PK field Value based on the Received Object data
+        switch(pk_column) {
+            case 'visits':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.visit_type);
+
+            break;
+            case 'workload':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.department);
+
+            break;
+            case 'payments':
+            record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.payment_mode);
+
+            break;
+            case 'inventory':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.item_type+record.item_name);
+
+            break;
+            case 'diagnosis':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.diagnosis_name);
+
+            break;
+            case 'billing':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.service_type);
+
+            break;
+            case 'admissions':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.ward);
+
+            break;
+            
+            
+          }
        
       });
       return jsonData;
@@ -36,16 +69,57 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
       // Start a transaction
       transaction = await sequelize.sequelize.transaction();
   
-      // Create multiple records within the transaction
-      const visits_created = await Visits.bulkCreate(visits_data, {
-        updateOnDuplicate: ['total'] // Update the 'email' field if the username already exists
-      }, { transaction });
-      const workload_created = await Workload.bulkCreate(workload_data, { transaction });
-      const payments_created = await Payments.bulkCreate(payments_data, { transaction });
-      const inventory_created = await Inventory.bulkCreate(inventory_data, { transaction });
-      const diagnosis_created = await Diagnosis.bulkCreate(diagnosis_data, { transaction });
-      const billing_created = await Billing.bulkCreate(billing_data, { transaction });
-      const admission_created = await Admissions.bulkCreate(admissions_data, { transaction });
+        // Create multiple records within the transaction
+        if (_.isEmpty(visits_data) == false) {
+            const visits_created = await Visits.bulkCreate(visits_data, {
+                updateOnDuplicate: ['total'] // Update the 'Total' field if the timestamp and visit type is same
+            }, { transaction });
+        }
+      
+        if (_.isEmpty(workload_data) == false) {
+            const workload_created = await Workload.bulkCreate(workload_data, {
+                updateOnDuplicate: ['total'] // Update the 'Total' field if the timestamp and visit type is same
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(payments_data) == false) {
+            const payments_created = await Payments.bulkCreate(payments_data, {
+                updateOnDuplicate: ['no_of_patients', 'amount_paid'] // Update the 'Total' field if the timestamp and visit type is same
+                // updateOnDuplicate: ['no_of_patients'] // Update the 'Total' field if the timestamp and visit type is same
+
+            }, { transaction });
+        }
+
+        if (_.isEmpty(inventory_data) == false) {
+            const inventory_created = await Inventory.bulkCreate(inventory_data, {
+                updateOnDuplicate: ['unit_of_measure', 'quantity_at_hand', 'quantity_consumed'] // Update the 'Total' field if the timestamp and visit type is same
+            }, { transaction });
+        }
+   
+        if (_.isEmpty(diagnosis_data) == false) {
+            const diagnosis_created = await Diagnosis.bulkCreate(diagnosis_data, {
+                updateOnDuplicate: ['total']// Update the 'Total' field if the timestamp and visit type is same
+            }, { transaction });
+        }
+
+        if (_.isEmpty(billing_data) == false) {
+            const billing_created = await Billing.bulkCreate(billing_data, {
+                // updateOnDuplicate: ['invoices_total']['amount_due']['amount_paid']['balance_due'] // Update the 'Total' field if the timestamp and visit type is same
+                updateOnDuplicate: ['invoices_total', 'amount_due', 'amount_paid', 'balance_due'] // Update the 'Total' field if the timestamp and visit type is same
+
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(admissions_data) == false) {
+            const admission_created = await Admissions.bulkCreate(admissions_data, {
+                updateOnDuplicate: ['capacity', 'occupancy', 'new_admissions']// Update the 'Total' field if the timestamp and visit type is same
+            }, { transaction });
+        }
+
+     
+     
 
       // If everything is successful, commit the transaction
       await transaction.commit();
@@ -88,14 +162,58 @@ let facility_attributes = {
 }  
 //Admissions
 
-//Add Facility Attributes
-const visits = addNewElement(req.body.visits,mfl_code,timestamp, timestamp_unix, 'visit_type');
-const workload = addNewElement(req.body.workload,mfl_code,timestamp, timestamp_unix, 'department');
-const payments = addNewElement(req.body.payments,mfl_code,timestamp, timestamp_unix, 'payment_mode');
-const inventory = addNewElement(req.body.inventory,mfl_code,timestamp, timestamp_unix,'item_name');
-const diagnosis = addNewElement(req.body.diagnosis,mfl_code,timestamp,timestamp_unix, 'diagnosis_name');
-const billing = addNewElement(req.body.billing,mfl_code,timestamp, timestamp_unix, 'service_type');
-const admissions = addNewElement(req.body.bed_management,mfl_code,timestamp, timestamp_unix, 'ward');
+    //Add Facility Attributes
+    //check if object exists or is empty
+    if(_.isEmpty(req.body.visits)==false)
+    {
+        var visits = addNewElement(req.body.visits, mfl_code, timestamp, timestamp_unix, 'visits');        
+    }else {
+        var visits = {};
+    }
+    console.log(visits);
+    if(_.isEmpty(req.body.workload) == false)
+    {
+        var workload = addNewElement(req.body.workload, mfl_code, timestamp, timestamp_unix, 'workload');
+    }else{
+        var workload = {};
+    }
+
+    if(_.isEmpty(req.body.payments) == false)
+    {
+        var payments = addNewElement(req.body.payments, mfl_code, timestamp, timestamp_unix, 'payments');
+    }else {
+        var payments = {};
+    }
+
+    if(_.isEmpty(req.body.inventory) == false)
+    {
+        var inventory = addNewElement(req.body.inventory, mfl_code, timestamp, timestamp_unix, 'inventory');
+    }else {
+        var inventory = {};
+    }
+
+    if(_.isEmpty(req.body.diagnosis) == false)
+    {
+        var diagnosis = addNewElement(req.body.diagnosis, mfl_code, timestamp, timestamp_unix, 'diagnosis');
+    }else{
+        var diagnosis = {};
+    }
+
+    if(_.isEmpty(req.body.billing) == false)
+    {
+        var billing = addNewElement(req.body.billing, mfl_code, timestamp, timestamp_unix, 'billing');
+    }else{
+        var billing = {};
+
+    }
+
+    if(_.isEmpty(req.body.bed_management) == false)
+    {
+        var admissions = addNewElement(req.body.bed_management, mfl_code, timestamp, timestamp_unix, 'admissions');
+    } else {
+        var admissions = {};
+    }
+
 
 
 
