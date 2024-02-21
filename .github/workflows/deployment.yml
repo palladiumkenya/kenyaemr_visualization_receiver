@@ -32,7 +32,8 @@ jobs:
           cp /apps/configs/kvisual/.env "$deploy_dir/"
           
           # Build and run Docker container
-          docker stop kvisual || true
-          docker rm kvisual || true
-          docker build -t kvisual:latest "$deploy_dir"
-          docker run -p 7008:5000 --name kvisual -d --restart always kvisual:latest
+          docker stop kvisual
+          docker rm -f kvisual 
+          docker build --no-cache -t kvisual:latest "$deploy_dir"
+          docker run -p 7008:5000 --name kvisual -d --restart always --security-opt=no-new-privileges --log-opt max-size=10m \
+           --log-opt max-file=3  kvisual:latest
