@@ -1,5 +1,5 @@
 {
-  "name": "KenyaEMR Data Visualizer",
+  "name": "KenyaEMRDataVisualizer",
   "version": "1.0.0",
   "description": "REST Server for KenyaEMR 3.x Visualizer",
   "main": "index.js",

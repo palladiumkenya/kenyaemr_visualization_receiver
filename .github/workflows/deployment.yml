@@ -1,0 +1,39 @@
+name:  deploying to test instance
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    name: Performing remote connection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Remote Connection Setup
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.CICD2_HOST }}
+        username: ${{ secrets.CICD2_USERNAME }}
+        key: ${{ secrets.CICD2_SECRET }}
+        port: ${{ secrets.PORT }}
+        script: |
+          # Set up deployment directory
+          deploy_dir="/apps/github-workflows/mhealth-apps/kenyaemr_visualization_reciever"
+          sudo rm -rf "$deploy_dir"
+          sudo mkdir "$deploy_dir"
+          sudo chown -R cicd2:cicd2 "$deploy_dir"
+          
+          # Clone repository
+          git config --global --add safe.directory "$deploy_dir"
+          git clone -b master https://github.com/palladiumkenya/kenyaemr_visualization_receiver.git "$deploy_dir"
+          
+          # Copy configuration files
+          cp /apps/configs/kvisual/.env "$deploy_dir/"
+          
+          # Build and run Docker container
+          docker stop kvisual
+          docker rm -f kvisual 
+          docker build --no-cache -t kvisual:latest "$deploy_dir"
+          docker run -p 7008:5000 --name kvisual -d --restart always --security-opt=no-new-privileges --log-opt max-size=10m \
+           --log-opt max-file=3  kvisual:latest
