@@ -26,7 +26,7 @@ jobs:
           
           # Clone repository
           git config --global --add safe.directory "$deploy_dir"
-          git clone -b main https://github.com/palladiumkenya/ushauri_api.git "$deploy_dir"
+          git clone -b master https://github.com/palladiumkenya/kenyaemr_visualization_receiver.git "$deploy_dir"
           
           # Copy configuration files
           cp /apps/configs/kvisual/.env "$deploy_dir/"
