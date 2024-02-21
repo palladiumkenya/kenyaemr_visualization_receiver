@@ -1,4 +1,4 @@
-name:  deployinf to test instance
+name:  deploying to test instance
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    name: Perfroming remote connection
+    name: Performing remote connection
     runs-on: ubuntu-latest
     
     steps:
