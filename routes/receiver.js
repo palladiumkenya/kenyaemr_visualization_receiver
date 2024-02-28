@@ -157,7 +157,7 @@ const seconds = date.getSeconds().toString().padStart(2, '0');
 const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
 let facility_attributes = {
-    "time_stamp": timestamp,
+    "timestamp": timestamp,
     "mfl_code": mfl_code
 }  
 //Admissions

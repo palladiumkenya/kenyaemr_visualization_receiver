@@ -8,7 +8,7 @@ const Diagnosis = sequelize.sequelize.define(
             primaryKey: true,
             autoIncrement: true
         },
-        time_stamp: Sequelize.TEXT,
+        timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
         diagnosis_name: Sequelize.TEXT,
         total: Sequelize.BIGINT,

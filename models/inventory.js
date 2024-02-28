@@ -8,7 +8,7 @@ const Inventory = sequelize.sequelize.define(
             primaryKey: true,
             autoIncrement: true
         },
-        time_stamp: Sequelize.TEXT,
+        timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
         item_type: Sequelize.TEXT,
         item_name: Sequelize.TEXT,

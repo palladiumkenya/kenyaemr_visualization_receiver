@@ -8,7 +8,7 @@ const Billing = sequelize.sequelize.define(
             primaryKey: true,
             autoIncrement: true
         },
-        time_stamp: Sequelize.TEXT,
+        timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
         service_type: Sequelize.TEXT,
         invoices_total: Sequelize.BIGINT,

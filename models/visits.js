@@ -8,7 +8,7 @@ const Visits = sequelize.sequelize.define(
             primaryKey: true,
             autoIncrement: true
         },
-        time_stamp: Sequelize.TEXT,
+        timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
         visit_type: Sequelize.TEXT,
         total: Sequelize.BIGINT,

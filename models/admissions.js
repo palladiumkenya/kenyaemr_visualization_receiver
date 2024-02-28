@@ -10,7 +10,7 @@ const Admissions = sequelize.sequelize.define(
         },
         mfl_code: Sequelize.INTEGER,
         ward: Sequelize.TEXT,
-        time_stamp: Sequelize.TEXT,
+        timestamp: Sequelize.TEXT,
 
         capacity: Sequelize.BIGINT,
         occupancy: Sequelize.BIGINT,

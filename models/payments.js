@@ -8,7 +8,7 @@ const Payments = sequelize.sequelize.define(
             primaryKey: true,
             autoIncrement: true
         },
-        time_stamp: Sequelize.TEXT,
+        timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
         payment_mode: Sequelize.TEXT,
         no_of_patients: Sequelize.INTEGER,
