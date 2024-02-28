@@ -22,7 +22,7 @@ function addNewElement(jsonData, mfl_code, time_stamp, timestamp_unix, pk_column
        
         record => {
         // Add a new key-value pair to each record
-        record.time_stamp = time_stamp;
+        record.timestamp = timestamp;
         record.mfl_code = mfl_code;
         //Generate PK field Value based on the Received Object data
         switch(pk_column) {
