@@ -13,7 +13,7 @@ const Inventory = sequelize.sequelize.define(
         item_type: Sequelize.TEXT,
         item_name: Sequelize.TEXT,
         unit_of_measure: Sequelize.TEXT,
-        quantity_on_hand: Sequelize.BIGINT,
+        quantity_at_hand: Sequelize.BIGINT,
         quantity_consumed: Sequelize.BIGINT,
         record_pk: {
             type: Sequelize.STRING,
