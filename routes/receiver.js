@@ -15,6 +15,8 @@ const {Inventory} = require("../models/inventory");
 const {Payments} = require("../models/payments");
 const {Visits} = require("../models/visits");
 const {Workload} = require("../models/workload");
+const {Mortality} = require("../models/mortality");
+
 
 // Function to add a new element to each record in the JSON array
 function addNewElement(jsonData, mfl_code, time_stamp, timestamp_unix, pk_column) {
@@ -28,31 +30,27 @@ function addNewElement(jsonData, mfl_code, time_stamp, timestamp_unix, pk_column
         switch(pk_column) {
             case 'visits':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.visit_type);
-
             break;
             case 'workload':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.department);
-
             break;
             case 'payments':
             record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.payment_mode);
-
             break;
             case 'inventory':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.item_type+record.item_name);
-
             break;
             case 'diagnosis':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.diagnosis_name);
-
             break;
             case 'billing':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.service_type);
-
             break;
             case 'admissions':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.ward);
-
+            break;
+            case 'mortality':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.cause_of_death);
             break;
             
             
@@ -63,7 +61,7 @@ function addNewElement(jsonData, mfl_code, time_stamp, timestamp_unix, pk_column
   }
 
   //Function To Create Data
-async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data) {
+async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data) {
     let transaction;
     try {
       // Start a transaction
@@ -115,6 +113,14 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
         if (_.isEmpty(admissions_data) == false) {
             const admission_created = await Admissions.bulkCreate(admissions_data, {
                 updateOnDuplicate: ['capacity', 'occupancy', 'new_admissions']// Update the 'Total' field if the timestamp and visit type is same
+            }, { transaction });
+        }
+
+
+        
+        if (_.isEmpty(mortality_data) == false) {
+            const mortality_created = await Mortality.bulkCreate(mortality_data, {
+                updateOnDuplicate: ['cause_of_death', 'total']// Update the 'Total' field if the timestamp and visit type is same
             }, { transaction });
         }
 
@@ -170,7 +176,7 @@ let facility_attributes = {
     }else {
         var visits = {};
     }
-    console.log(visits);
+    //console.log(visits);
     if(_.isEmpty(req.body.workload) == false)
     {
         var workload = addNewElement(req.body.workload, mfl_code, timestamp, timestamp_unix, 'workload');
@@ -215,11 +221,20 @@ let facility_attributes = {
     }
 
 
+    if(_.isEmpty(req.body.mortality) == false)
+    {
+        var mortality = addNewElement(req.body.mortality, mfl_code, timestamp, timestamp_unix, 'mortality');
+    } else {
+        var mortality = {};
+    }
 
 
 
 
-visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions )
+
+
+
+visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality )
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 
