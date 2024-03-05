@@ -146,18 +146,18 @@ var mfl_code=req.body.mfl_code;
 
 // Convert the UNIX timestamp to milliseconds
 const timestamp_unix = req.body.timestamp;
-const timestampMs = req.body.timestamp * 1000;
+//const timestampMs = req.body.timestamp * 1000;
 
 // Create a new Date object using the timestamp in milliseconds
-const date = new Date(timestampMs);
+
 
 // Extract the different components of the date
-const year = date.getFullYear();
-const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
-const day = date.getDate().toString().padStart(2, '0');
-const hours = date.getHours().toString().padStart(2, '0');
-const minutes = date.getMinutes().toString().padStart(2, '0');
-const seconds = date.getSeconds().toString().padStart(2, '0');
+const year = timestamp_unix(0,4);
+const month =timestamp_unix.substring(4, 6); // Months are 0-based
+const day = timestamp_unix.substring(6, 8);
+const hours = timestamp_unix.substring(8, 10);
+const minutes = timestamp_unix.substring(10, 12);
+const seconds = timestamp_unix.substring(12, 14);
 
 // Create a string representation of the date and time
 const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
