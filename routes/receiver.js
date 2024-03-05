@@ -152,7 +152,7 @@ const timestamp_unix = req.body.timestamp;
 
 
 // Extract the different components of the date
-const year = timestamp_unix(0,4);
+const year = timestamp_unix.substring(0,4);
 const month =timestamp_unix.substring(4, 6); // Months are 0-based
 const day = timestamp_unix.substring(6, 8);
 const hours = timestamp_unix.substring(8, 10);
@@ -160,7 +160,9 @@ const minutes = timestamp_unix.substring(10, 12);
 const seconds = timestamp_unix.substring(12, 14);
 
 // Create a string representation of the date and time
-const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+const timestamp = year+'-'+ month+'-'+day+' '+hours+':'+minutes+':'+seconds;
+
+console.log(timestamp);
 
 let facility_attributes = {
     "timestamp": timestamp,
