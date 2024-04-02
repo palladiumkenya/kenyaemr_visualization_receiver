@@ -12,6 +12,7 @@ const DiagnosisTest = sequelize.sequelize.define(
         mfl_code: Sequelize.INTEGER,
         county: Sequelize.TEXT,
         sub_county: Sequelize.TEXT,
+        facility_name:Sequelize.TEXT,
         diagnosis_name: Sequelize.TEXT,
         total: Sequelize.BIGINT,
         record_pk: {

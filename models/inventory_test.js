@@ -13,7 +13,6 @@ const InventoryTest = sequelize.sequelize.define(
         county: Sequelize.TEXT,
         sub_county: Sequelize.TEXT,
         facility_name:Sequelize.TEXT,
-
         item_type: Sequelize.TEXT,
         item_name: Sequelize.TEXT,
         unit_of_measure: Sequelize.TEXT,
