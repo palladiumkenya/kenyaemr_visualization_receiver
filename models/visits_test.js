@@ -10,6 +10,10 @@ const VisitsTest = sequelize.sequelize.define(
         },
         timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
+        county: Sequelize.TEXT,
+        sub_county: Sequelize.TEXT,
+        facility_name:Sequelize.TEXT,
+
         visit_type: Sequelize.TEXT,
         total: Sequelize.BIGINT,
         record_pk: {

@@ -10,6 +10,9 @@ const DischargesTest = sequelize.sequelize.define(
         },
         time_stamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
+        county: Sequelize.TEXT,
+        sub_county: Sequelize.TEXT,
+        facility_name:Sequelize.TEXT,
         discharge_status: Sequelize.TEXT,
         total: Sequelize.BIGINT,
         record_pk: {

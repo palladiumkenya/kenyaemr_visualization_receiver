@@ -9,6 +9,8 @@ const Admissions = sequelize.sequelize.define(
             autoIncrement: true
         },
         mfl_code: Sequelize.INTEGER,
+        county: Sequelize.TEXT,
+        sub_county: Sequelize.TEXT,
         ward: Sequelize.TEXT,
         timestamp: Sequelize.TEXT,
 

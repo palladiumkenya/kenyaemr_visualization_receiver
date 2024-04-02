@@ -1,6 +1,11 @@
 const express = require("express");
 const sequelize = require("../db_config");
 const base64 = require("base64util");
+require("dotenv").config();
+const request = require('request');
+
+const http = require('https');
+
 
 const router = express.Router();
 // const bcrypt = require("bcrypt");
@@ -26,6 +31,38 @@ const {PaymentsTest} = require("../models/payments_test");
 const {VisitsTest} = require("../models/visits_test");
 const {WorkloadTest} = require("../models/workload_test");
 const {MortalityTest} = require("../models/mortality_test");
+
+//Check Empty Json
+function isEmptyJSON(jsonObject) {
+    return JSON.stringify(jsonObject) === '{}' || JSON.stringify(jsonObject) === '[]';
+}
+
+//Pull Facility Locator Information ie Name, County & Sub County from HIS list
+function fetchData(mfl_code) {
+    return new Promise((resolve, reject) => {
+        http.get(process.env.HIS_LIST+mfl_code, (response) => {
+            let data = '';
+
+            // A chunk of data has been received.
+            response.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            // The whole response has been received.
+            response.on('end', () => {
+                try {
+                    const parsedData = JSON.parse(data);
+                    resolve(parsedData); // Resolve the promise with parsed data
+                } catch (error) {
+                    reject(error); // Reject the promise if parsing fails
+                }
+            });
+        }).on('error', (error) => {
+            reject(error); // Error making the request
+        });
+    });
+}
+
 
 
 // Function to add a new element to each record in the JSON array
@@ -171,14 +208,34 @@ const seconds = timestamp_unix.substring(12, 14);
 
 // Create a string representation of the date and time
 const timestamp = year+'-'+ month+'-'+day+' '+hours+':'+minutes+':'+seconds;
+const facility_details = await fetchData(mfl_code);
+if((isEmptyJSON(facility_details.facilities)==true) || (facility_details.facilities === undefined))
+{
+    return  res.status(500).json({ success: false,
+        msg: 'An Error Occurred, Missing Facility Locator Information',
+        data: {
+            "timestamp": timestamp,
+            "mfl_code": mfl_code,
+        } ,
+      });
 
-console.log(timestamp);
+}
+
+
+var county=facility_details.facilities[0]._county;
+var sub_county=facility_details.facilities[0]._subcounty;
+var facility_name=facility_details.facilities[0].name;
+ 
 
 let facility_attributes = {
     "timestamp": timestamp,
-    "mfl_code": mfl_code
+    "mfl_code": mfl_code,
+    "county":county,
+    "sub_county":sub_county,
+    "facility_name":facility_name
 }  
 //Admissions
+console.log(facility_attributes);
 
     //Add Facility Attributes
     //check if object exists or is empty

@@ -10,6 +10,10 @@ const Payments = sequelize.sequelize.define(
         },
         timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
+        county: Sequelize.TEXT,
+        sub_county: Sequelize.TEXT,
+        facility_name:Sequelize.TEXT,
+
         payment_mode: Sequelize.TEXT,
         no_of_patients: Sequelize.INTEGER,
         amount_paid: Sequelize.BIGINT,
