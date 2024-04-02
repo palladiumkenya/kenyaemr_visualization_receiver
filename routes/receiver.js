@@ -4,7 +4,7 @@ const base64 = require("base64util");
 require("dotenv").config();
 const request = require('request');
 
-const http = require('http');
+const http = require('https');
 
 
 const router = express.Router();
@@ -39,8 +39,11 @@ function isEmptyJSON(jsonObject) {
 
 //Pull Facility Locator Information ie Name, County & Sub County from HIS list
 function fetchData(mfl_code) {
+    const options = {
+        rejectUnauthorized: false
+      };
     return new Promise((resolve, reject) => {
-        http.get(process.env.HIS_LIST+mfl_code, (response) => {
+        http.get(process.env.HIS_LIST+mfl_code,options, (response) => {
             let data = '';
 
             // A chunk of data has been received.
