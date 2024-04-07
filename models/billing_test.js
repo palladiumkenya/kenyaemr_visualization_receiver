@@ -1,8 +1,8 @@
-const sequelize = require("../db_config");
+const sequelize = require("../db_config_test");
 const Sequelize = require("sequelize");
 
-const BillingTest = sequelize.sequelize.define(
-    "billing_test", {
+const Billing = sequelize.sequelize.define(
+    "billing", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -27,7 +27,7 @@ const BillingTest = sequelize.sequelize.define(
         paranoid: true,
         underscored: true,
         freezeTableName: true,
-        tableName: "billing_test"
+        tableName: "billing"
     }
 );
-exports.BillingTest = BillingTest;
+exports.Billing = Billing;

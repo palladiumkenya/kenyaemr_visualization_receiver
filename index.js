@@ -7,6 +7,8 @@ const passport = require('passport');
 require('./passport-config')(passport);
 
 const receiver = require("./routes/receiver");
+const receiver_test = require("./routes/receiver_test");
+
 
 // app.use(express.json());
 app.use(bodyParser.json());
@@ -17,6 +19,8 @@ app.use(bodyParser.urlencoded({
 
 //verify upi 
 app.use('/superset',receiver);
+app.use('/superset_test',receiver_test);
+
 
 
 

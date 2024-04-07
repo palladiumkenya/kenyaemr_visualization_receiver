@@ -1,8 +1,8 @@
-const sequelize = require("../db_config");
+const sequelize = require("../db_config_test");
 const Sequelize = require("sequelize");
 
-const InventoryTest = sequelize.sequelize.define(
-    "inventory_test", {
+const Inventory = sequelize.sequelize.define(
+    "inventory", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -13,6 +13,7 @@ const InventoryTest = sequelize.sequelize.define(
         county: Sequelize.TEXT,
         sub_county: Sequelize.TEXT,
         facility_name:Sequelize.TEXT,
+
         item_type: Sequelize.TEXT,
         item_name: Sequelize.TEXT,
         unit_of_measure: Sequelize.TEXT,
@@ -27,7 +28,7 @@ const InventoryTest = sequelize.sequelize.define(
         paranoid: true,
         underscored: true,
         freezeTableName: true,
-        tableName: "inventory_test"
+        tableName: "inventory"
     }
 );
-exports.InventoryTest = InventoryTest;
+exports.Inventory = Inventory;

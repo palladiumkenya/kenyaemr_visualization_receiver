@@ -1,8 +1,8 @@
-const sequelize = require("../db_config");
+const sequelize = require("../db_config_test");
 const Sequelize = require("sequelize");
 
-const AdmissionsTest = sequelize.sequelize.define(
-    "admissions_test", {
+const Admissions = sequelize.sequelize.define(
+    "admissions", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -27,7 +27,7 @@ const AdmissionsTest = sequelize.sequelize.define(
         paranoid: true,
         underscored: true,
         freezeTableName: true,
-        tableName: "admissions_test"
+        tableName: "admissions"
     }
 );
-exports.AdmissionsTest = AdmissionsTest;
+exports.Admissions = Admissions;

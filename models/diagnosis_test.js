@@ -1,8 +1,8 @@
-const sequelize = require("../db_config");
+const sequelize = require("../db_config_test");
 const Sequelize = require("sequelize");
 
-const DiagnosisTest = sequelize.sequelize.define(
-    "diagnosis_test", {
+const Diagnosis = sequelize.sequelize.define(
+    "diagnosis", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -24,7 +24,7 @@ const DiagnosisTest = sequelize.sequelize.define(
         paranoid: true,
         underscored: true,
         freezeTableName: true,
-        tableName: "diagnosis_test"
+        tableName: "diagnosis"
     }
 );
-exports.DiagnosisTest = DiagnosisTest;
+exports.Diagnosis = Diagnosis;

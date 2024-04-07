@@ -1,8 +1,8 @@
-const sequelize = require("../db_config");
+const sequelize = require("../db_config_test");
 const Sequelize = require("sequelize");
 
-const WorkloadTest = sequelize.sequelize.define(
-    "workload_test", {
+const Workload = sequelize.sequelize.define(
+    "workload", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -25,7 +25,7 @@ const WorkloadTest = sequelize.sequelize.define(
         paranoid: true,
         underscored: true,
         freezeTableName: true,
-        tableName: "workload_test"
+        tableName: "workload"
     }
 );
-exports.WorkloadTest = WorkloadTest;
+exports.Workload = Workload;

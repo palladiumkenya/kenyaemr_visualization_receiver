@@ -1,5 +1,5 @@
 const express = require("express");
-const sequelize = require("../db_config");
+const sequelize = require("../db_config_test");
 const base64 = require("base64util");
 require("dotenv").config();
 const request = require('request');
@@ -11,15 +11,15 @@ const router = express.Router();
 // const bcrypt = require("bcrypt");
 const _ = require("lodash");
 
-const {Admissions} = require("../models/admissions");
-const {Billing} = require("../models/billing");
-const {Diagnosis} = require("../models/diagnosis");
-const {Discharges} = require("../models/discharges");
-const {Inventory} = require("../models/inventory");
-const {Payments} = require("../models/payments");
-const {Visits} = require("../models/visits");
-const {Workload} = require("../models/workload");
-const {Mortality} = require("../models/mortality");
+const {Admissions} = require("../models/admissions_test");
+const {Billing} = require("../models/billing_test");
+const {Diagnosis} = require("../models/diagnosis_test");
+const {Discharges} = require("../models/discharges_test");
+const {Inventory} = require("../models/inventory_test");
+const {Payments} = require("../models/payments_test");
+const {Visits} = require("../models/visits_test");
+const {Workload} = require("../models/workload_test");
+const {Mortality} = require("../models/mortality_test");
 
 
 //Check Empty Json
