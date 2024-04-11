@@ -21,6 +21,9 @@ const {Visits} = require("../models/visits_test");
 const {Workload} = require("../models/workload_test");
 const {Mortality} = require("../models/mortality_test");
 
+const {Waittime} = require("../models/waittime_test");
+
+
 
 //Check Empty Json
 function isEmptyJSON(jsonObject) {
@@ -95,6 +98,9 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
             case 'mortality':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.cause_of_death);
             break;
+            case 'waittime':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.queue);
+            break;
             
             
           }
@@ -104,7 +110,7 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
   }
 
 //Function To Create Data
-async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data) {
+async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data) {
     let transaction;
     try {
       // Start a transaction
@@ -164,6 +170,13 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
         if (_.isEmpty(mortality_data) == false) {
             const mortality_created = await Mortality.bulkCreate(mortality_data, {
                 updateOnDuplicate: ['cause_of_death', 'total']// Update the 'Total' field if the timestamp and visit type is same
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(waittime_data) == false) {
+            const waittime_created = await Waittime.bulkCreate(waittime_data, {
+                updateOnDuplicate: ['queue', 'average_wait_time']// Update the 'Total' field if the timestamp and visit type is same
             }, { transaction });
         }
 
@@ -293,13 +306,21 @@ console.log(facility_attributes);
         var mortality = {};
     }
 
+    if(_.isEmpty(req.body.wait_time) == false)
+    {
+        var waittime = addNewElement(req.body.wait_time, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'waittime');
+    } else {
+        var waittime = {};
+    }
 
 
 
 
 
 
-visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality )
+
+
+visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime )
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 
