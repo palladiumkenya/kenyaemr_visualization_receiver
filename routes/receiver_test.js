@@ -21,7 +21,16 @@ const {Visits} = require("../models/visits_test");
 const {Workload} = require("../models/workload_test");
 const {Mortality} = require("../models/mortality_test");
 
+
 const {Waittime} = require("../models/waittime_test");
+
+const {Immunization} = require("../models/immunization_test");
+const {OPD_Visits_Services} = require("../models/opd_visits_service_test");
+const {Revenue_by_department} = require("../models/revenue_by_department_test");
+const {Staff} = require("../models/staff_test");
+const {Waivers} = require("../models/waivers_test");
+const {OPD_Visits_Age} = require("../models/opd_visits_age_test");
+
 
 
 
@@ -101,6 +110,29 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
             case 'waittime':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.queue);
             break;
+
+            case 'immunization':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.vaccine);
+            break;
+
+            case 'revenue_by_department':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.department);
+            break;
+            case 'opd_visit_by_service_type':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.service);
+            break;
+
+            case 'staff_count':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.staff);
+            break;
+
+            case 'waivers':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.waivers);
+            break;
+
+            case 'opd_visits':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.age);
+            break;
             
             
           }
@@ -110,7 +142,7 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
   }
 
 //Function To Create Data
-async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data) {
+async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data, opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data) {
     let transaction;
     try {
       // Start a transaction
@@ -180,8 +212,50 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
             }, { transaction });
         }
 
-     
-     
+
+        
+        if (_.isEmpty(immunization_data) == false) {
+            const immunization_created = await Immunization.bulkCreate(immunization_data, {
+                updateOnDuplicate: ['total']// Update the Vaccine & Total
+            }, { transaction });
+        }
+
+        if (_.isEmpty(opd_visits_services_data) == false) {
+            const opd_visits_service_created = await OPD_Visits_Services.bulkCreate(opd_visits_services_data, {
+                updateOnDuplicate: ['total']// Update the Service/Department & Total
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(revenue_data) == false) {
+            const revenue_created = await Revenue_by_department.bulkCreate(revenue_data, {
+                updateOnDuplicate: ['patient_count', 'amount']// Update the Department Patient & Total
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(staff_data) == false) {
+            const staff_created = await Staff.bulkCreate(staff_data, {
+                updateOnDuplicate: [ 'staff_count']// Update the Department Patient & Total
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(waivers_data) == false) {
+            const waivers_created = await Waivers.bulkCreate(waivers_data, {
+                updateOnDuplicate: [ 'waivers']// Update the Waiver 
+            }, { transaction });
+        }
+        if (_.isEmpty(opd_visits_age_data) == false) {
+            const opd_visits_age_created = await OPD_Visits_Age.bulkCreate(opd_visits_age_data, {
+                updateOnDuplicate: ['total']// Update the Service/Department & Total
+            }, { transaction });
+        }
+
+
+        //OPD_Visits_Age
+        
+
 
       // If everything is successful, commit the transaction
       await transaction.commit();
@@ -314,13 +388,62 @@ console.log(facility_attributes);
     }
 
 
+    if(_.isEmpty(req.body.immunization) == false)
+    {
+        var immunization = addNewElement(req.body.immunization, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'immunization');
+    } else {
+        var immunization = {};
+    }
+
+    if(_.isEmpty(req.body.revenue_by_department) == false)
+    {
+        var revenue_by_department = addNewElement(req.body.revenue_by_department, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'revenue_by_department');
+    } else {
+        var revenue_by_department = {};
+    }
+
+    if(_.isEmpty(req.body.opd_visit_by_service_type) == false)
+    {
+        var opd_visit_by_service_type = addNewElement(req.body.opd_visit_by_service_type, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'opd_visit_by_service_type');
+    } else {
+        var opd_visit_by_service_type = {};
+    }
+
+    if(_.isEmpty(req.body.staff_count) == false)
+    {
+            var staff = addNewElement(req.body.staff_count, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'staff_count');
+    } else {
+            var staff = {};
+    }
+
+
+    if(_.isEmpty(req.body.waivers) == false)
+    {
+            var waivers = addNewElement(req.body.waivers, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'waivers');
+    } else {
+           var waivers = {};
+    }
+
+    
+    if(_.isEmpty(req.body.opd_visits) == false)
+        {
+                var opd_visits = addNewElement(req.body.opd_visits, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'opd_visits');
+        } else {
+               var opd_visits = {};
+        }
+    
+
+    
+            
+        
+    
+
+        
 
 
 
 
-
-
-visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime )
+visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits )
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 
