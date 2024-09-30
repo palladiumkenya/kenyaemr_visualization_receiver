@@ -31,6 +31,9 @@ const {Staff} = require("../models/staff_test");
 const {Waivers} = require("../models/waivers_test");
 const {OPD_Visits_Age} = require("../models/opd_visits_age_test");
 
+const {Version} = require("../models/version_test");
+
+
 
 
 
@@ -133,6 +136,7 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
             case 'opd_visits':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.age);
             break;
+
             
             
           }
@@ -142,7 +146,7 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
   }
 
 //Function To Create Data
-async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data, opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data) {
+async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data, opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data, version_data) {
     let transaction;
     try {
       // Start a transaction
@@ -249,6 +253,13 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
         if (_.isEmpty(opd_visits_age_data) == false) {
             const opd_visits_age_created = await OPD_Visits_Age.bulkCreate(opd_visits_age_data, {
                 updateOnDuplicate: ['total']// Update the Service/Department & Total
+            }, { transaction });
+        }
+
+        if (_.isEmpty(version_data) == false) {
+            console.log(version_data);
+            const version_created = await Version.create(version_data, {
+                updateOnDuplicate: ['version']// Update Version
             }, { transaction });
         }
 
@@ -431,6 +442,24 @@ console.log(facility_attributes);
         } else {
                var opd_visits = {};
         }
+
+    if(_.isEmpty(req.body.version) == false)
+        {
+            var version_data = {
+                "timestamp": timestamp,
+                "mfl_code": mfl_code,
+                "county":county,
+                "sub_county":sub_county,
+                "facility_name":facility_name,
+                "record_pk" : base64.encode(mfl_code+timestamp_unix+req.body.version),
+                "version": req.body.version
+            }  
+               // var version => {req.body.version, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix};
+        } else {
+                var version_data = {};
+        }
+
+        //console.log(version);  exit();
     
 
     
@@ -443,7 +472,7 @@ console.log(facility_attributes);
 
 
 
-visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits )
+visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , version_data)
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 
