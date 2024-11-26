@@ -23,6 +23,15 @@ const {Mortality} = require("../models/mortality");
 
 const {Waittime} = require("../models/waittime");
 
+const {Immunization} = require("../models/immunization");
+const {OPD_Visits_Services} = require("../models/opd_visits_service");
+const {Revenue_by_department} = require("../models/revenue_by_department");
+const {Staff} = require("../models/staff");
+const {Waivers} = require("../models/waivers");
+const {OPD_Visits_Age} = require("../models/opd_visits_age");
+
+const {Version} = require("../models/version");
+
 
 //Check Empty Json
 function isEmptyJSON(jsonObject) {
@@ -100,6 +109,30 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
             case 'waittime':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.queue);
             break;
+
+            case 'immunization':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.vaccine);
+            break;
+
+            case 'revenue_by_department':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.department);
+            break;
+            case 'opd_visit_by_service_type':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.service);
+            break;
+
+            case 'staff_count':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.staff);
+            break;
+
+            case 'waivers':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.waivers);
+            break;
+
+            case 'opd_visits':
+                record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.age);
+            break;
+
             
             
           }
@@ -109,7 +142,7 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
   }
 
 //Function To Create Data
-async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data) {
+async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data, opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data, version_data) {
     let transaction;
     try {
       // Start a transaction
@@ -179,8 +212,57 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
             }, { transaction });
         }
 
-     
-     
+
+        
+        if (_.isEmpty(immunization_data) == false) {
+            const immunization_created = await Immunization.bulkCreate(immunization_data, {
+                updateOnDuplicate: ['total']// Update the Vaccine & Total
+            }, { transaction });
+        }
+
+        if (_.isEmpty(opd_visits_services_data) == false) {
+            const opd_visits_service_created = await OPD_Visits_Services.bulkCreate(opd_visits_services_data, {
+                updateOnDuplicate: ['total']// Update the Service/Department & Total
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(revenue_data) == false) {
+            const revenue_created = await Revenue_by_department.bulkCreate(revenue_data, {
+                updateOnDuplicate: ['patient_count', 'amount']// Update the Department Patient & Total
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(staff_data) == false) {
+            const staff_created = await Staff.bulkCreate(staff_data, {
+                updateOnDuplicate: [ 'staff_count']// Update the Department Patient & Total
+            }, { transaction });
+        }
+
+
+        if (_.isEmpty(waivers_data) == false) {
+            const waivers_created = await Waivers.bulkCreate(waivers_data, {
+                updateOnDuplicate: [ 'waivers']// Update the Waiver 
+            }, { transaction });
+        }
+        if (_.isEmpty(opd_visits_age_data) == false) {
+            const opd_visits_age_created = await OPD_Visits_Age.bulkCreate(opd_visits_age_data, {
+                updateOnDuplicate: ['total']// Update the Service/Department & Total
+            }, { transaction });
+        }
+
+        if (_.isEmpty(version_data) == false) {
+            console.log(version_data);
+            const version_created = await Version.create(version_data, {
+                updateOnDuplicate: ['version']// Update Version
+            }, { transaction });
+        }
+
+
+        //OPD_Visits_Age
+        
+
 
       // If everything is successful, commit the transaction
       await transaction.commit();
@@ -249,9 +331,31 @@ console.log(facility_attributes);
     //check if object exists or is empty
     if(_.isEmpty(req.body.visits)==false)
     {
-        var visits = addNewElement(req.body.visits, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'visits');        
+       // var visits = addNewElement(req.body.visits, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'visits');  
+        //Extract Service Type
+        var opdVisitByServiceType = req.body.visits
+        .filter(visit => visit.category === "service_type") // Focus on "serviceType" category
+        .flatMap(visit => visit.details) // Flatten the details array
+        .map(service => ({ service: service.service, total: service.total })); // Format each service
+
+
+
+        // Extracting Visits by age
+        var opdVisits = req.body.visits
+        .filter(visit => visit.category === "visit_type") // Focus on "visit_type" category
+        .flatMap(visit => visit.details) // Flatten details array
+        .flatMap(detail => detail.age_details) // Extract age_details array
+        .map(ageDetail => ({
+        age: ageDetail.age,
+        total: ageDetail.total
+        })); // Format each age detail
+
+       
+      
+        
     }else {
         var visits = {};
+        
     }
     //console.log(visits);
     if(_.isEmpty(req.body.workload) == false)
@@ -263,7 +367,36 @@ console.log(facility_attributes);
 
     if(_.isEmpty(req.body.payments) == false)
     {
-        var payments = addNewElement(req.body.payments, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'payments');
+        
+
+        var revenueByDepartment = req.body.payments
+        .filter(payment => payment.category === "department") // Focus on "department" category
+        .flatMap(payment => payment.details) // Flatten details array
+        .map(department => ({
+            department: department.department,
+            patient_count: department.patient_count || "0", // Default patient_count to "0" if missing
+            amount: department.amount || department.amount_paid || "0.00" // Handle amount field variations
+        })); // Format the details
+
+
+
+        // Extract revenue by payment mode
+        var revenueByPaymentMode = req.body.payments
+        .filter(payment => payment.category === "payment_mode") // Focus on "payment_mode" category
+        .flatMap(payment => payment.details) // Flatten details array
+        .map(paymentMode => ({
+        payment_mode: paymentMode.payment_mode,
+        no_of_patients: paymentMode.no_of_patients || "0", // Default patient count to "0" if missing
+        amount_paid: paymentMode.amount_paid || "0.00" // Default amount to "0.00" if missing
+        })); // Format the details
+    }else {
+        var payments = {};
+    }
+
+
+    if(_.isEmpty(revenueByPaymentMode) == false)
+    {
+        var payments = addNewElement(revenueByPaymentMode, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'payments');
     }else {
         var payments = {};
     }
@@ -313,13 +446,80 @@ console.log(facility_attributes);
     }
 
 
+    if(_.isEmpty(req.body.immunization) == false)
+    {
+        var immunization = addNewElement(req.body.immunization, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'immunization');
+    } else {
+        var immunization = {};
+    }
+
+    if(_.isEmpty(revenueByDepartment) == false)
+    {
+        var revenue_by_department = addNewElement(revenueByDepartment, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'revenue_by_department');
+    } else {
+        var revenue_by_department = {};
+    }
+
+    if(_.isEmpty(opdVisitByServiceType) == false)
+    {
+        var opd_visit_by_service_type = addNewElement(opdVisitByServiceType, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'opd_visit_by_service_type');
+    } else {
+        var opd_visit_by_service_type = {};
+    }
+
+    if(_.isEmpty(req.body.staff_count) == false)
+    {
+            var staff = addNewElement(req.body.staff_count, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'staff_count');
+    } else {
+            var staff = {};
+    }
+
+
+    if(_.isEmpty(req.body.waivers) == false)
+    {
+            var waivers = addNewElement(req.body.waivers, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'waivers');
+    } else {
+           var waivers = {};
+    }
+
+    
+    if(_.isEmpty(opdVisits) == false)
+        {
+                var opd_visits = addNewElement(opdVisits, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'opd_visits');
+        } else {
+               var opd_visits = {};
+        }
+
+    if(_.isEmpty(req.body.version) == false)
+        {
+            var version_data = {
+                "timestamp": timestamp,
+                "mfl_code": mfl_code,
+                "county":county,
+                "sub_county":sub_county,
+                "facility_name":facility_name,
+                "record_pk" : base64.encode(mfl_code+timestamp_unix+req.body.version),
+                "version": req.body.version
+            }  
+               // var version => {req.body.version, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix};
+        } else {
+                var version_data = {};
+        }
+
+        //console.log(version);  exit();
+    
+
+    
+            
+        
+    
+
+        
 
 
 
 
-
-
-visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime )
+visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , version_data)
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 

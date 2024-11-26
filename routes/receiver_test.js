@@ -335,9 +335,31 @@ console.log(facility_attributes);
     //check if object exists or is empty
     if(_.isEmpty(req.body.visits)==false)
     {
-        var visits = addNewElement(req.body.visits, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'visits');        
+       // var visits = addNewElement(req.body.visits, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'visits');  
+        //Extract Service Type
+        var opdVisitByServiceType = req.body.visits
+        .filter(visit => visit.category === "service_type") // Focus on "serviceType" category
+        .flatMap(visit => visit.details) // Flatten the details array
+        .map(service => ({ service: service.service, total: service.total })); // Format each service
+
+
+
+        // Extracting Visits by age
+        var opdVisits = req.body.visits
+        .filter(visit => visit.category === "visit_type") // Focus on "visit_type" category
+        .flatMap(visit => visit.details) // Flatten details array
+        .flatMap(detail => detail.age_details) // Extract age_details array
+        .map(ageDetail => ({
+        age: ageDetail.age,
+        total: ageDetail.total
+        })); // Format each age detail
+
+       
+      
+        
     }else {
         var visits = {};
+        
     }
     //console.log(visits);
     if(_.isEmpty(req.body.workload) == false)
@@ -349,7 +371,36 @@ console.log(facility_attributes);
 
     if(_.isEmpty(req.body.payments) == false)
     {
-        var payments = addNewElement(req.body.payments, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'payments');
+        
+
+        var revenueByDepartment = req.body.payments
+        .filter(payment => payment.category === "department") // Focus on "department" category
+        .flatMap(payment => payment.details) // Flatten details array
+        .map(department => ({
+            department: department.department,
+            patient_count: department.patient_count || "0", // Default patient_count to "0" if missing
+            amount: department.amount || department.amount_paid || "0.00" // Handle amount field variations
+        })); // Format the details
+
+
+
+        // Extract revenue by payment mode
+        var revenueByPaymentMode = req.body.payments
+        .filter(payment => payment.category === "payment_mode") // Focus on "payment_mode" category
+        .flatMap(payment => payment.details) // Flatten details array
+        .map(paymentMode => ({
+        payment_mode: paymentMode.payment_mode,
+        no_of_patients: paymentMode.no_of_patients || "0", // Default patient count to "0" if missing
+        amount_paid: paymentMode.amount_paid || "0.00" // Default amount to "0.00" if missing
+        })); // Format the details
+    }else {
+        var payments = {};
+    }
+
+
+    if(_.isEmpty(revenueByPaymentMode) == false)
+    {
+        var payments = addNewElement(revenueByPaymentMode, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'payments');
     }else {
         var payments = {};
     }
@@ -406,16 +457,16 @@ console.log(facility_attributes);
         var immunization = {};
     }
 
-    if(_.isEmpty(req.body.revenue_by_department) == false)
+    if(_.isEmpty(revenueByDepartment) == false)
     {
-        var revenue_by_department = addNewElement(req.body.revenue_by_department, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'revenue_by_department');
+        var revenue_by_department = addNewElement(revenueByDepartment, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'revenue_by_department');
     } else {
         var revenue_by_department = {};
     }
 
-    if(_.isEmpty(req.body.opd_visit_by_service_type) == false)
+    if(_.isEmpty(opdVisitByServiceType) == false)
     {
-        var opd_visit_by_service_type = addNewElement(req.body.opd_visit_by_service_type, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'opd_visit_by_service_type');
+        var opd_visit_by_service_type = addNewElement(opdVisitByServiceType, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'opd_visit_by_service_type');
     } else {
         var opd_visit_by_service_type = {};
     }
@@ -436,9 +487,9 @@ console.log(facility_attributes);
     }
 
     
-    if(_.isEmpty(req.body.opd_visits) == false)
+    if(_.isEmpty(opdVisits) == false)
         {
-                var opd_visits = addNewElement(req.body.opd_visits, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'opd_visits');
+                var opd_visits = addNewElement(opdVisits, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'opd_visits');
         } else {
                var opd_visits = {};
         }
