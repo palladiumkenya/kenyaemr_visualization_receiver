@@ -335,7 +335,18 @@ console.log(facility_attributes);
     //check if object exists or is empty
     if(_.isEmpty(req.body.visits)==false)
     {
-       // var visits = addNewElement(req.body.visits, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'visits');  
+
+        var visits_nested = req.body.visits
+        .filter(visit => visit.category === "visit_type") // Focus on "visit_type"
+        .flatMap(visit => visit.details) // Flatten details array
+        .map(detail => ({
+            visit_type: detail.visit_type || "unknown", // Default if missing
+            total: detail.total || "0" // Default to "0" if missing
+        })); // Format into desired structure
+
+      
+
+
         //Extract Service Type
         var opdVisitByServiceType = req.body.visits
         .filter(visit => visit.category === "service_type") // Focus on "serviceType" category
@@ -344,23 +355,33 @@ console.log(facility_attributes);
 
 
 
-        // Extracting Visits by age
-        var opdVisits = req.body.visits
-        .filter(visit => visit.category === "visit_type") // Focus on "visit_type" category
-        .flatMap(visit => visit.details) // Flatten details array
-        .flatMap(detail => detail.age_details) // Extract age_details array
+         var opdVisits = req.body.visits
+        .filter(visit => visit.category === "visit_type") // Focus on "visit_type"
+        .flatMap(visit => visit.details) // Flatten the details array
+        .filter(detail => detail.visit_type === "Outpatient") // Focus on Outpatient visits
+        .flatMap(outpatient => outpatient.age_details) // Extract age details
         .map(ageDetail => ({
-        age: ageDetail.age,
-        total: ageDetail.total
-        })); // Format each age detail
+            age: ageDetail.age,
+            total: ageDetail.total
+        })); // Format into desired structure
 
-       
+              
       
         
     }else {
         var visits = {};
         
     }
+
+
+    //console.log(visits);
+    if(_.isEmpty(visits_nested) == false)
+        {
+            var visits_nested = addNewElement(visits_nested, mfl_code, facility_name,county, sub_county, timestamp, timestamp_unix, 'visits');
+        }else{
+            var visits_nested = {};
+        }
+    
     //console.log(visits);
     if(_.isEmpty(req.body.workload) == false)
     {
@@ -523,7 +544,7 @@ console.log(facility_attributes);
 
 
 
-visualizer_records(facility_attributes, visits,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , version_data)
+visualizer_records(facility_attributes, visits_nested,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , version_data)
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 
