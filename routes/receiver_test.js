@@ -34,13 +34,24 @@ const {OPD_Visits_Age} = require("../models/opd_visits_age_test");
 const {Version} = require("../models/version_test");
 
 
-
-
-
 //Check Empty Json
 function isEmptyJSON(jsonObject) {
     return JSON.stringify(jsonObject) === '{}' || JSON.stringify(jsonObject) === '[]';
 }
+
+// Function to recursively convert keys to lowercase
+function convertKeysToLowercase(obj) {
+    if (Array.isArray(obj)) {
+      return obj.map(item => convertKeysToLowercase(item));
+    } else if (typeof obj === "object" && obj !== null) {
+      return Object.keys(obj).reduce((acc, key) => {
+        acc[key.toLowerCase()] = convertKeysToLowercase(obj[key]);
+        return acc;
+      }, {});
+    } else {
+      return obj;
+    }
+  }
 
 //Pull Facility Locator Information ie Name, County & Sub County from HIS list
 function fetchData(mfl_code) {
@@ -283,6 +294,10 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
 router.post("/", async (req, res) => {
 
 //Receive Payload
+
+////var req = convertKeysToLowercase(req_new);
+//console.log(req_new);
+
 var mfl_code=req.body.mfl_code;
 
 // Convert the UNIX timestamp to milliseconds
