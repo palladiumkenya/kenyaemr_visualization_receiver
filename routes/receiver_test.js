@@ -32,7 +32,7 @@ const {Waivers} = require("../models/waivers_test");
 const {OPD_Visits_Age} = require("../models/opd_visits_age_test");
 
 const {Version} = require("../models/version_test");
-
+const {ShaEnrol} = require("../models/sha_enrollment_test");
 
 //Check Empty Json
 function isEmptyJSON(jsonObject) {
@@ -51,7 +51,7 @@ function convertKeysToLowercase(obj) {
     } else {
       return obj;
     }
-  }
+  } 
 
 //Pull Facility Locator Information ie Name, County & Sub County from HIS list
 function fetchData(mfl_code) {
@@ -147,7 +147,6 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
             case 'opd_visits':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.age);
             break;
-
             
             
           }
@@ -157,7 +156,7 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
   }
 
 //Function To Create Data
-async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data, opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data, version_data) {
+async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data, opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data, version_data, sha_enrollment_data) {
     let transaction;
     try {
       // Start a transaction
@@ -271,6 +270,13 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
             console.log(version_data);
             const version_created = await Version.create(version_data, {
                 updateOnDuplicate: ['version']// Update Version
+            }, { transaction });
+        }
+
+        if (_.isEmpty(sha_enrollment_data) == false) {
+            console.log(sha_enrollment_data);
+            const sha_enrolment_created = await ShaEnrol.create(sha_enrollment_data, {
+                updateOnDuplicate: ['sha_enrollment']// Update SHA Enrolment Data
             }, { transaction });
         }
 
@@ -493,6 +499,13 @@ console.log(facility_attributes);
         var immunization = {};
     }
 
+    if(_.isEmpty(req.body.Immunization) == false)
+        {
+            var immunization = addNewElement(req.body.Immunization, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'immunization');
+        } else {
+            var immunization = {};
+        }
+
     if(_.isEmpty(revenueByDepartment) == false)
     {
         var revenue_by_department = addNewElement(revenueByDepartment, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'revenue_by_department');
@@ -546,7 +559,27 @@ console.log(facility_attributes);
                 var version_data = {};
         }
 
-        //console.log(version);  exit();
+        if (req.body.hasOwnProperty('sha_enrollments') && req.body.sha_enrollments !== null && req.body.sha_enrollments !== '') 
+        //if(_.isEmpty(req.body.sha_enrollments) == false)
+            {
+                const shaValue = String(req.body.sha_enrollments); // ensure it's a string for concatenation
+
+                var sha_enrollment_data = {
+                    "timestamp": timestamp,
+                    "mfl_code": mfl_code,
+                    "county":county,
+                    "sub_county":sub_county,
+                    "facility_name":facility_name,
+                    "record_pk" : base64.encode(mfl_code+timestamp_unix+shaValue),
+                    "sha_enrollment": req.body.sha_enrollments
+                }  
+                   // var version => {req.body.version, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix};
+            } else {
+                    var sha_enrollment_data = {};
+            }
+    
+
+        console.log(req.body.sha_enrollments);
     
 
     
@@ -559,7 +592,7 @@ console.log(facility_attributes);
 
 
 
-visualizer_records(facility_attributes, visits_nested,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , version_data)
+visualizer_records(facility_attributes, visits_nested,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , version_data, sha_enrollment_data)
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 
