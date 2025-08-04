@@ -26,4 +26,4 @@ const ShaEnrol = sequelize.sequelize.define(
         tableName: "sha_enrollment"
     }
 );
-exports.Version = Version;
+exports.ShaEnrol = ShaEnrol;

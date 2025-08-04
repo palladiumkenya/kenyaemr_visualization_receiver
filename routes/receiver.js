@@ -21,6 +21,7 @@ const {Visits} = require("../models/visits");
 const {Workload} = require("../models/workload");
 const {Mortality} = require("../models/mortality");
 
+
 const {Waittime} = require("../models/waittime");
 
 const {Immunization} = require("../models/immunization");
@@ -31,41 +32,49 @@ const {Waivers} = require("../models/waivers");
 const {OPD_Visits_Age} = require("../models/opd_visits_age");
 
 const {Version} = require("../models/version");
+const {ShaEnrol} = require("../models/sha_enrollment");
 
-
+const facilities = require('../facilities.json');
+ 
 //Check Empty Json
 function isEmptyJSON(jsonObject) {
     return JSON.stringify(jsonObject) === '{}' || JSON.stringify(jsonObject) === '[]';
 }
 
+// Function to recursively convert keys to lowercase
+function convertKeysToLowercase(obj) {
+    if (Array.isArray(obj)) {
+      return obj.map(item => convertKeysToLowercase(item));
+    } else if (typeof obj === "object" && obj !== null) {
+      return Object.keys(obj).reduce((acc, key) => {
+        acc[key.toLowerCase()] = convertKeysToLowercase(obj[key]);
+        return acc;
+      }, {});
+    } else {
+      return obj;
+    }
+  } 
+
 //Pull Facility Locator Information ie Name, County & Sub County from HIS list
 function fetchData(mfl_code) {
-    const options = {
-        rejectUnauthorized: false
-      };
     return new Promise((resolve, reject) => {
-        http.get(process.env.HIS_LIST+mfl_code,options, (response) => {
-            let data = '';
+        // Validate MFL code
+        if (!mfl_code || typeof mfl_code !== 'string') {
+            return reject(new Error('Invalid MFL code'));
+        }
+        
 
-            // A chunk of data has been received.
-            response.on('data', (chunk) => {
-                data += chunk;
-            });
-
-            // The whole response has been received.
-            response.on('end', () => {
-                try {
-                    const parsedData = JSON.parse(data);
-                    resolve(parsedData); // Resolve the promise with parsed data
-                } catch (error) {
-                    reject(error); // Reject the promise if parsing fails
-                }
-            });
-        }).on('error', (error) => {
-            reject(error); // Error making the request
-        });
+        // Check if MFL code exists in local JSON
+        if (facilities[mfl_code]) {
+                               // const parsedData = JSON.parse(facilities[mfl_code]);
+            console.log(facilities[mfl_code]);
+             resolve(facilities[mfl_code]); // Resolve the promise with parsed data
+        } else {
+            reject(new Error(`MFL code ${mfl_code} not found in file`));
+        }
     });
 }
+
 
 
 
@@ -132,7 +141,6 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
             case 'opd_visits':
                 record.record_pk =  base64.encode(mfl_code+timestamp_unix+record.age);
             break;
-
             
             
           }
@@ -142,7 +150,7 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
   }
 
 //Function To Create Data
-async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data, opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data, version_data) {
+async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data, diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data, opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data, version_data, sha_enrollment_data) {
     let transaction;
     try {
       // Start a transaction
@@ -259,6 +267,13 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
             }, { transaction });
         }
 
+        if (_.isEmpty(sha_enrollment_data) == false) {
+            console.log(sha_enrollment_data);
+            const sha_enrolment_created = await ShaEnrol.create(sha_enrollment_data, {
+                updateOnDuplicate: ['sha_enrollment']// Update SHA Enrolment Data
+            }, { transaction });
+        }
+
 
         //OPD_Visits_Age
         
@@ -279,6 +294,10 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
 router.post("/", async (req, res) => {
 
 //Receive Payload
+
+////var req = convertKeysToLowercase(req_new);
+//console.log(req_new);
+
 var mfl_code=req.body.mfl_code;
 
 // Convert the UNIX timestamp to milliseconds
@@ -298,23 +317,43 @@ const seconds = timestamp_unix.substring(12, 14);
 
 // Create a string representation of the date and time
 const timestamp = year+'-'+ month+'-'+day+' '+hours+':'+minutes+':'+seconds;
-const facility_details = await fetchData(mfl_code);
-if((isEmptyJSON(facility_details.facilities)==true) || (facility_details.facilities === undefined))
-{
-    return  res.status(500).json({ success: false,
-        msg: 'An Error Occurred, Missing Facility Locator Information',
-        data: {
-            "timestamp": timestamp,
-            "mfl_code": mfl_code,
-        } ,
-      });
+try {
+    facility_details = await fetchData(mfl_code);
 
+    // Check if result is undefined, null, or not an object
+    if (
+        !facility_details || 
+        typeof facility_details !== 'object' || 
+        isEmptyJSON(facility_details) === true
+    ) {
+        return res.status(500).json({
+            success: false,
+            msg: 'An Error Occurred, Missing or Invalid Facility Locator Information',
+            data: {
+                timestamp,
+                mfl_code
+            }
+        });
+    }
+} catch (error) {
+    console.error("Error fetching facility details:", error.message);
+
+    return res.status(500).json({
+        success: false,
+        msg: 'An Error Occurred while fetching Facility Locator Information',
+        data: {
+            timestamp,
+            mfl_code,
+            error: error.message
+        }
+    });
 }
 
 
-var county=facility_details.facilities[0]._county;
-var sub_county=facility_details.facilities[0]._subcounty;
-var facility_name=facility_details.facilities[0].name;
+
+var county=facility_details.county;
+var sub_county=facility_details.sub_county;
+var facility_name=facility_details.name;
  
 
 let facility_attributes = {
@@ -474,6 +513,13 @@ console.log(facility_attributes);
         var immunization = {};
     }
 
+    if(_.isEmpty(req.body.Immunization) == false)
+        {
+            var immunization = addNewElement(req.body.Immunization, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'immunization');
+        } else {
+            var immunization = {};
+        }
+
     if(_.isEmpty(revenueByDepartment) == false)
     {
         var revenue_by_department = addNewElement(revenueByDepartment, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'revenue_by_department');
@@ -527,7 +573,27 @@ console.log(facility_attributes);
                 var version_data = {};
         }
 
-        //console.log(version);  exit();
+        if (req.body.hasOwnProperty('sha_enrollments') && req.body.sha_enrollments !== null && req.body.sha_enrollments !== '') 
+        //if(_.isEmpty(req.body.sha_enrollments) == false)
+            {
+                const shaValue = String(req.body.sha_enrollments); // ensure it's a string for concatenation
+
+                var sha_enrollment_data = {
+                    "timestamp": timestamp,
+                    "mfl_code": mfl_code,
+                    "county":county,
+                    "sub_county":sub_county,
+                    "facility_name":facility_name,
+                    "record_pk" : base64.encode(mfl_code+timestamp_unix+shaValue),
+                    "sha_enrollment": req.body.sha_enrollments
+                }  
+                   // var version => {req.body.version, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix};
+            } else {
+                    var sha_enrollment_data = {};
+            }
+    
+
+        console.log(req.body.sha_enrollments);
     
 
     
@@ -540,7 +606,7 @@ console.log(facility_attributes);
 
 
 
-visualizer_records(facility_attributes, visits_nested,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , version_data)
+visualizer_records(facility_attributes, visits_nested,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , version_data, sha_enrollment_data)
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 

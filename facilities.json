@@ -1,0 +1,22 @@
+{
+  "11111": {
+    "name": "Bethel Teaching General Hospital",
+    "county": "Addis Ababa",
+    "sub_county": "Kolfe Keranyo"
+  },
+  "ET002": {
+    "name": "Betezata General Hospital",
+    "county": "Addis Ababa",
+    "sub_county": "Kirkos"
+  },
+  "ET003": {
+    "name": "Kadisco General Hospital",
+    "county": "Addis Ababa",
+    "sub_county": "Bole"
+  },
+  "ET004": {
+    "name": "Bella Military Referral Hospital",
+    "county": "Addis Ababa",
+    "sub_county": "Yeka"
+  }
+}

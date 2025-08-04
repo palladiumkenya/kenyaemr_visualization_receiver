@@ -34,6 +34,8 @@ const {OPD_Visits_Age} = require("../models/opd_visits_age_test");
 const {Version} = require("../models/version_test");
 const {ShaEnrol} = require("../models/sha_enrollment_test");
 
+const facilities = require('../facilities.json');
+ 
 //Check Empty Json
 function isEmptyJSON(jsonObject) {
     return JSON.stringify(jsonObject) === '{}' || JSON.stringify(jsonObject) === '[]';
@@ -55,32 +57,24 @@ function convertKeysToLowercase(obj) {
 
 //Pull Facility Locator Information ie Name, County & Sub County from HIS list
 function fetchData(mfl_code) {
-    const options = {
-        rejectUnauthorized: false
-      };
     return new Promise((resolve, reject) => {
-        http.get(process.env.HIS_LIST+mfl_code,options, (response) => {
-            let data = '';
+        // Validate MFL code
+        if (!mfl_code || typeof mfl_code !== 'string') {
+            return reject(new Error('Invalid MFL code'));
+        }
+        
 
-            // A chunk of data has been received.
-            response.on('data', (chunk) => {
-                data += chunk;
-            });
-
-            // The whole response has been received.
-            response.on('end', () => {
-                try {
-                    const parsedData = JSON.parse(data);
-                    resolve(parsedData); // Resolve the promise with parsed data
-                } catch (error) {
-                    reject(error); // Reject the promise if parsing fails
-                }
-            });
-        }).on('error', (error) => {
-            reject(error); // Error making the request
-        });
+        // Check if MFL code exists in local JSON
+        if (facilities[mfl_code]) {
+                               // const parsedData = JSON.parse(facilities[mfl_code]);
+            console.log(facilities[mfl_code]);
+             resolve(facilities[mfl_code]); // Resolve the promise with parsed data
+        } else {
+            reject(new Error(`MFL code ${mfl_code} not found in file`));
+        }
     });
 }
+
 
 
 
@@ -323,23 +317,43 @@ const seconds = timestamp_unix.substring(12, 14);
 
 // Create a string representation of the date and time
 const timestamp = year+'-'+ month+'-'+day+' '+hours+':'+minutes+':'+seconds;
-const facility_details = await fetchData(mfl_code);
-if((isEmptyJSON(facility_details.facilities)==true) || (facility_details.facilities === undefined))
-{
-    return  res.status(500).json({ success: false,
-        msg: 'An Error Occurred, Missing Facility Locator Information',
-        data: {
-            "timestamp": timestamp,
-            "mfl_code": mfl_code,
-        } ,
-      });
+try {
+    facility_details = await fetchData(mfl_code);
 
+    // Check if result is undefined, null, or not an object
+    if (
+        !facility_details || 
+        typeof facility_details !== 'object' || 
+        isEmptyJSON(facility_details) === true
+    ) {
+        return res.status(500).json({
+            success: false,
+            msg: 'An Error Occurred, Missing or Invalid Facility Locator Information',
+            data: {
+                timestamp,
+                mfl_code
+            }
+        });
+    }
+} catch (error) {
+    console.error("Error fetching facility details:", error.message);
+
+    return res.status(500).json({
+        success: false,
+        msg: 'An Error Occurred while fetching Facility Locator Information',
+        data: {
+            timestamp,
+            mfl_code,
+            error: error.message
+        }
+    });
 }
 
 
-var county=facility_details.facilities[0]._county;
-var sub_county=facility_details.facilities[0]._subcounty;
-var facility_name=facility_details.facilities[0].name;
+
+var county=facility_details.county;
+var sub_county=facility_details.sub_county;
+var facility_name=facility_details.name;
  
 
 let facility_attributes = {
