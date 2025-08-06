@@ -1,38 +1,38 @@
 {
   "11161": {
-    "name": "Bethel Teaching General Hospital",
+    "name": "Bethel Teaching and Referral Hospital",
     "county": "Addis Ababa",
     "sub_county": "Kolfe Keranyo"
   },
   "13015": {
-    "name": "Betezata General Hospital",
+    "name": "Betezeta General Hospital",
     "county": "Addis Ababa",
     "sub_county": "Kirkos"
-  },
-  "13080": {
-    "name": "Kadisco General Hospital",
-    "county": "Addis Ababa",
-    "sub_county": "Bole"
   },
   "24979": {
     "name": "Bella Military Referral Hospital",
     "county": "Addis Ababa",
     "sub_county": "Yeka"
   },
-  "14027": {
-    "name": "Adama General Hospital",
-    "county": "Oromia",
-    "sub_county": "Adama"
+  "13080": {
+    "name": "Addis Ketema Health Centre",
+    "county": "Addis Ababa",
+    "sub_county": "Addis Ketema"
+  },
+  "13122": {
+    "name": "Kadisco General Hospital",
+    "county": "Addis Ababa",
+    "sub_county": "Addis Ketema"
   },
   "14080": {
-    "name": "Adama Referral Hospital",
+    "name": "Adama Hospital Medical College",
     "county": "Oromia",
-    "sub_county": "Adama"
+    "sub_county": "Aba Geda"
   },
   "11141": {
-    "name": "Rift Valley Hospital",
+    "name": "Defense Specialized Referral Hospital",
     "county": "Oromia",
-    "sub_county": "Adama"
+    "sub_county": "Bishoftu"
   },
   "13738": {
     "name": "Sister Aklesa Hospital",
@@ -40,8 +40,8 @@
     "sub_county": "Adama"
   },
   "13156": {
-    "name": "Wonji Hospital",
+    "name": "Digalu-Tijo Primary Hospital",
     "county": "Oromia",
-    "sub_county": "Wonji"
+    "sub_county": "Digalu-Tijo"
   }
 }
