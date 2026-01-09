@@ -14,6 +14,8 @@ const Diagnosis = sequelize.sequelize.define(
         sub_county: Sequelize.TEXT,
         facility_name:Sequelize.TEXT,
         diagnosis_name: Sequelize.TEXT,
+        diagnosis_details: Sequelize.TEXT,
+        department_name: Sequelize.TEXT,
         total: Sequelize.BIGINT,
         record_pk: {
             type: Sequelize.STRING,

@@ -178,7 +178,7 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
    
         if (_.isEmpty(diagnosis_data) == false) {
             const diagnosis_created = await Diagnosis.bulkCreate(diagnosis_data, {
-                updateOnDuplicate: ['total']// Update the 'Total' field if the timestamp and visit type is same
+                updateOnDuplicate: ['total', 'department_name', 'diagnosis_details']// Update the 'Total' field if the timestamp and visit type is same
             }, { transaction });
         }
 
