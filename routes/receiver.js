@@ -517,11 +517,19 @@ console.log(facility_attributes);
                var opd_visits = {};
         }
 
-    if(_.isEmpty(req.body.bed_management) == false)
-    {
-            var bed_management = addNewElement(req.body.bed_management, mfl_code, facility_name,county, sub_county,timestamp, timestamp_unix, 'bed_management');
+    if (_.isEmpty(req.body.bed_management) == false) {
+      var bed_management = addNewElement(
+        req.body.bed_management,
+        mfl_code,
+        facility_name,
+        county,
+        sub_county,
+        timestamp,
+        timestamp_unix,
+        "bed_management",
+      );
     } else {
-           var bed_management = {};
+      var bed_management = {};
     }        
 
     if(_.isEmpty(req.body.version) == false)
