@@ -8,8 +8,10 @@ RUN npm install && npm cache clean --force
 
 COPY . .
 
+RUN chmod +x docker/start.sh
+
 EXPOSE 5000
 
 ENV NODE_ENV=production
 
-CMD ["node", "index.js"]
+CMD ["sh", "docker/start.sh"]
