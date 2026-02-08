@@ -12,7 +12,6 @@ const BedManagement = sequelize.sequelize.define(
         county: Sequelize.TEXT,
         sub_county: Sequelize.TEXT,
         facility_name:Sequelize.TEXT,
-        ward: Sequelize.TEXT,
         timestamp: Sequelize.TEXT,
 
         ward: Sequelize.TEXT,
