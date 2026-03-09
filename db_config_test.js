@@ -19,17 +19,17 @@ const sequelize = new Sequelize(database, username, password, {
       min: 0,
       idle: 900000
     },
-
+    logging: false,
 });
 
 const connect = async () => {
   await sequelize
     .authenticate()
     .then(() => {
-      console.log("Connection has been established successfully.");
+      logger.info("Connection has been established successfully.");
     })
     .catch(err => {
-      console.log("Unable to connect to the database:", err.message);
+      logger.error("Unable to connect to the database: %s", err.message);
     });
 };
 

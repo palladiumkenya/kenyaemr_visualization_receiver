@@ -3,6 +3,7 @@ const sequelize = require("../db_config_test");
 const base64 = require("base64util");
 require("dotenv").config();
 const request = require('request');
+const logger = require("../logger");
 
 const http = require('https');
 
@@ -274,14 +275,14 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
         }          
 
         if (_.isEmpty(version_data) == false) {
-            console.log(version_data);
+            logger.debug('version_data: %o', version_data);
             const version_created = await Version.create(version_data, {
                 updateOnDuplicate: ['version']// Update Version
             }, { transaction });
         }
 
         if (_.isEmpty(sha_enrollment_data) == false) {
-            console.log(sha_enrollment_data);
+            logger.debug('sha_enrollment_data: %o', sha_enrollment_data);
             const sha_enrolment_created = await ShaEnrol.create(sha_enrollment_data, {
                 updateOnDuplicate: ['sha_enrollment']// Update SHA Enrolment Data
             }, { transaction });
@@ -357,7 +358,7 @@ let facility_attributes = {
     "facility_name":facility_name
 }  
 //Admissions
-console.log(facility_attributes);
+logger.debug('facility_attributes: %o', facility_attributes);
 
     //Add Facility Attributes
     //check if object exists or is empty
@@ -601,7 +602,7 @@ console.log(facility_attributes);
             }
     
 
-        console.log(req.body.sha_enrollments);
+        logger.debug('sha_enrollments: %o', req.body.sha_enrollments);
     
 
 visualizer_records(facility_attributes, visits_nested,workload, payments, inventory,diagnosis,billing, admissions, mortality, waittime, immunization,  opd_visit_by_service_type , revenue_by_department,staff,waivers, opd_visits , bed_management, version_data, sha_enrollment_data)

@@ -5,6 +5,7 @@ require("express-async-errors");
 require("dotenv").config();
 const passport = require('passport');
 require('./passport-config')(passport);
+const logger = require("./logger");
 
 const receiver = require("./routes/receiver");
 const receiver_test = require("./routes/receiver_test");
@@ -16,17 +17,20 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+// Log all incoming requests at debug level
+app.use((req, res, next) => {
+    logger.debug(`${req.method} ${req.originalUrl} - ip: ${req.ip} - body: %o`, req.body);
+    next();
+});
 
-//verify upi 
+//verify upi
 app.use('/superset',receiver);
 app.use('/superset_test',receiver_test);
 
 
 
 
-
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
-    console.log(`Kenya EMR 3.x Data Receiver App started. Listening on Port: ${PORT}`)
+    logger.info(`Kenya EMR 3.x Data Receiver App started. Listening on Port: ${PORT}`)
 );
