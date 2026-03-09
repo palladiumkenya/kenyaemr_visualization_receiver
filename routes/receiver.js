@@ -3,6 +3,7 @@ const sequelize = require("../db_config");
 const base64 = require("base64util");
 require("dotenv").config();
 const request = require('request');
+const logger = require("../logger");
 
 const http = require('https');
 
@@ -262,7 +263,7 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
         }        
 
         if (_.isEmpty(version_data) == false) {
-            console.log(version_data);
+            logger.debug('version_data: %o', version_data);
             const version_created = await Version.create(version_data, {
                 updateOnDuplicate: ['version']// Update Version
             }, { transaction });
@@ -331,7 +332,7 @@ let facility_attributes = {
     "facility_name":facility_name
 }  
 //Admissions
-console.log(facility_attributes);
+logger.debug('facility_attributes: %o', facility_attributes);
 
     //Add Facility Attributes
     //check if object exists or is empty

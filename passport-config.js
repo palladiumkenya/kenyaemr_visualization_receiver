@@ -1,5 +1,6 @@
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
+const logger = require('./logger');
  
 
 
@@ -24,7 +25,7 @@ module.exports = passport => {
         }
        });
       
-      console.log(user);
+      logger.debug('passport jwt user lookup: %o', user);
     //  const user = NUsers.find(u => u.id === jwt_payload.username);
  
       if (user) {
