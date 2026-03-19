@@ -2,7 +2,6 @@ const express = require("express");
 const sequelize = require("../db_config");
 const base64 = require("base64util");
 require("dotenv").config();
-const request = require('request');
 const logger = require("../logger");
 
 const http = require('https');
