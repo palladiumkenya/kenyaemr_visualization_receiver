@@ -1,7 +1,7 @@
-const sequelize = require("../db_config_test");
+const sequelize = require("../db_config");
 const Sequelize = require("sequelize");
 
-const ShaEnrol = sequelize.sequelize.define(
+const ShaEnrollment = sequelize.sequelize.define(
     "sha_enrollment", {
         id: {
             type: Sequelize.INTEGER,
@@ -26,4 +26,4 @@ const ShaEnrol = sequelize.sequelize.define(
         tableName: "sha_enrollment"
     }
 );
-exports.Version = Version;
+exports.ShaEnrollment = ShaEnrollment;

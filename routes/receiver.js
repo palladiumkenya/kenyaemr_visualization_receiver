@@ -2,7 +2,6 @@ const express = require("express");
 const sequelize = require("../db_config");
 const base64 = require("base64util");
 require("dotenv").config();
-const request = require('request');
 const logger = require("../logger");
 
 const http = require('https');
@@ -33,6 +32,7 @@ const {OPD_Visits_Age} = require("../models/opd_visits_age");
 const {BedManagement} = require("../models/bed_management");
 
 const {Version} = require("../models/version");
+const {ShaEnrollment} = require("../models/sha_enrollment");
 
 
 //Check Empty Json
@@ -146,7 +146,7 @@ function addNewElement(jsonData, mfl_code,facility_name,county, sub_county, time
 //Function To Create Data
 async function visualizer_records(facility_data, visits_data, workload_data, payments_data, inventory_data,
      diagnosis_data, billing_data, admissions_data, mortality_data, waittime_data, immunization_data,
-      opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data, bed_management_data, version_data) {
+      opd_visits_services_data, revenue_data, staff_data, waivers_data, opd_visits_age_data, bed_management_data, version_data, sha_enrollment_data) {
     let transaction;
     try {
       // Start a transaction
@@ -269,7 +269,12 @@ async function visualizer_records(facility_data, visits_data, workload_data, pay
             }, { transaction });
         }
 
-        //OPD_Visits_Age
+        if (_.isEmpty(sha_enrollment_data) == false) {
+            logger.debug('sha_enrollment_data: %o', sha_enrollment_data);
+            const sha_enrolment_created = await ShaEnrollment.create(sha_enrollment_data, {
+                updateOnDuplicate: ['sha_enrollment']// Update SHA Enrolment Data
+            }, { transaction });
+        }
 
       // If everything is successful, commit the transaction
       await transaction.commit();
@@ -549,11 +554,26 @@ logger.debug('facility_attributes: %o', facility_attributes);
                 var version_data = {};
         }
 
-        //console.log(version);  exit();
-    
-visualizer_records(facility_attributes, visits_nested,workload, payments, inventory,diagnosis,billing, admissions,
+    if (req.body.hasOwnProperty('sha_enrollments') && req.body.sha_enrollments !== null && req.body.sha_enrollments !== '') {
+        const shaValue = String(req.body.sha_enrollments);
+        var sha_enrollment_data = {
+            "timestamp": timestamp,
+            "mfl_code": mfl_code,
+            "county": county,
+            "sub_county": sub_county,
+            "facility_name": facility_name,
+            "record_pk": base64.encode(mfl_code + timestamp_unix + shaValue),
+            "sha_enrollment": req.body.sha_enrollments
+        };
+    } else {
+        var sha_enrollment_data = {};
+    }
+
+    logger.debug('sha_enrollments: %o', req.body.sha_enrollments);
+
+visualizer_records(facility_attributes, visits_nested, workload, payments, inventory, diagnosis, billing, admissions,
      mortality, waittime, immunization, opd_visit_by_service_type, revenue_by_department, staff, waivers, opd_visits,
-     bed_management,version_data)
+     bed_management, version_data, sha_enrollment_data)
   .then(
     facility_attributes => {
       return  res.status(200).json({success: true, 
