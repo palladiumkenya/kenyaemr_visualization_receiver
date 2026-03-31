@@ -6,6 +6,8 @@ const logger = require("../logger");
 
 const http = require('https');
 
+const FACILITY_CACHE_TTL_MS = (parseInt(process.env.FACILITY_CACHE_TTL_HOURS, 10) || 24) * 60 * 60 * 1000;
+const facilityCache = new Map();
 
 const router = express.Router();
 // const bcrypt = require("bcrypt");
@@ -42,15 +44,21 @@ function isEmptyJSON(jsonObject) {
 
 //Pull Facility Locator Information ie Name, County & Sub County from HIS list
 function fetchData(mfl_code) {
+    const cached = facilityCache.get(mfl_code);
+    if (cached && (Date.now() - cached.timestamp < FACILITY_CACHE_TTL_MS)) {
+        logger.debug(`Facility cache hit for MFL code: ${mfl_code}`);
+        return Promise.resolve(cached.data);
+    }
+
     const options = {
         rejectUnauthorized: false
       };
       const fullUrl = `${process.env.HIS_LIST}${mfl_code}`;
-      logger.info('Full HIS URL: ', fullUrl);
+      logger.info(`Full HIS URL: ${fullUrl}`);
     return new Promise((resolve, reject) => {
-        
+
         http.get(process.env.HIS_LIST+mfl_code,options, (response) => {
-             
+
             let data = '';
 
             // A chunk of data has been received.
@@ -62,13 +70,15 @@ function fetchData(mfl_code) {
             response.on('end', () => {
                 try {
                     const parsedData = JSON.parse(data);
-                    resolve(parsedData); // Resolve the promise with parsed data
+                    facilityCache.set(mfl_code, { data: parsedData, timestamp: Date.now() });
+                    logger.debug(`Facility cache set for MFL code: ${mfl_code}`);
+                    resolve(parsedData);
                 } catch (error) {
-                    reject(error); // Reject the promise if parsing fails
+                    reject(error);
                 }
             });
         }).on('error', (error) => {
-            reject(error); // Error making the request
+            reject(error);
         });
     });
 }
@@ -572,8 +582,6 @@ logger.debug('facility_attributes: %o', facility_attributes);
     } else {
         var sha_enrollment_data = {};
     }
-
-    logger.debug('sha_enrollments: %o', req.body.sha_enrollments);
 
 visualizer_records(facility_attributes, visits_nested, workload, payments, inventory, diagnosis, billing, admissions,
      mortality, waittime, immunization, opd_visit_by_service_type, revenue_by_department, staff, waivers, opd_visits,
