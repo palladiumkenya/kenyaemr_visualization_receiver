@@ -45,9 +45,10 @@ function fetchData(mfl_code) {
     const options = {
         rejectUnauthorized: false
       };
+      const fullUrl = `${process.env.HIS_LIST}${mfl_code}`;
+      logger.info('Full HIS URL: ', fullUrl);
     return new Promise((resolve, reject) => {
-        const fullUrl = `${process.env.HIS_LIST}${mfl_code}`;
-        logger.info('Full HIS URL: ', fullUrl);
+        
         http.get(process.env.HIS_LIST+mfl_code,options, (response) => {
              
             let data = '';
