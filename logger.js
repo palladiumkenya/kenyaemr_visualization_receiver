@@ -18,10 +18,7 @@ const logger = createLogger({
     transports: [
         new transports.Console({
             format: combine(
-                splat(),
                 colorize({ all: true }),
-                timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-                errors({ stack: true }),
                 lineFormat
             ),
         }),
