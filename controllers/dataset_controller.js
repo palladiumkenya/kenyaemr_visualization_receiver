@@ -7,7 +7,6 @@ const { parseTimestamp } = require("../utils/timestamp");
 const services = require("../services");
 const { Version } = require("../models/version");
 
-// Handle POST /api/v2/dataset — dispatches to a per-dataset_type service.
 async function createDataset(req, res) {
     const mfl_code = req.body.mfl_code;
     const timestamp_unix = req.body.timestamp;
@@ -55,7 +54,6 @@ async function createDataset(req, res) {
     logger.debug('dataset_type: %s, facility_attributes: %o', dataset_type, facility_attributes);
 
     try {
-        // Persist the payload version (independent of dataset_type), mirroring receiver.js
         if (!_.isEmpty(req.body.version)) {
             await Version.upsert({
                 ...facility_attributes,
