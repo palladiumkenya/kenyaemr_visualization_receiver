@@ -4,10 +4,8 @@ const base64 = require("base64util");
 require("dotenv").config();
 const logger = require("../logger");
 
-const http = require('https');
-
-const FACILITY_CACHE_TTL_MS = (parseInt(process.env.FACILITY_CACHE_TTL_HOURS, 10) || 24) * 60 * 60 * 1000;
-const facilityCache = new Map();
+const { fetchData, isEmptyJSON } = require("../utils/facility");
+const { parseTimestamp } = require("../utils/timestamp");
 
 const router = express.Router();
 // const bcrypt = require("bcrypt");
@@ -35,54 +33,6 @@ const {BedManagement} = require("../models/bed_management");
 
 const {Version} = require("../models/version");
 const {ShaEnrollment} = require("../models/sha_enrollment");
-
-
-//Check Empty Json
-function isEmptyJSON(jsonObject) {
-    return JSON.stringify(jsonObject) === '{}' || JSON.stringify(jsonObject) === '[]';
-}
-
-//Pull Facility Locator Information ie Name, County & Sub County from HIS list
-function fetchData(mfl_code) {
-    const cached = facilityCache.get(mfl_code);
-    if (cached && (Date.now() - cached.timestamp < FACILITY_CACHE_TTL_MS)) {
-        logger.debug(`Facility cache hit for MFL code: ${mfl_code}`);
-        return Promise.resolve(cached.data);
-    }
-
-    const options = {
-        rejectUnauthorized: false
-      };
-      const fullUrl = `${process.env.HIS_LIST}${mfl_code}`;
-      logger.info(`Full HIS URL: ${fullUrl}`);
-    return new Promise((resolve, reject) => {
-
-        http.get(process.env.HIS_LIST+mfl_code,options, (response) => {
-
-            let data = '';
-
-            // A chunk of data has been received.
-            response.on('data', (chunk) => {
-                data += chunk;
-            });
-
-            // The whole response has been received.
-            response.on('end', () => {
-                try {
-                    const parsedData = JSON.parse(data);
-                    facilityCache.set(mfl_code, { data: parsedData, timestamp: Date.now() });
-                    logger.debug(`Facility cache set for MFL code: ${mfl_code}`);
-                    resolve(parsedData);
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        }).on('error', (error) => {
-            reject(error);
-        });
-    });
-}
-
 
 
 // Function to add a new element to each record in the JSON array
@@ -307,23 +257,9 @@ router.post("/", async (req, res) => {
 //Receive Payload
 var mfl_code=req.body.mfl_code;
 
-// Convert the UNIX timestamp to milliseconds
+// Convert the compact timestamp into a formatted string
 const timestamp_unix = req.body.timestamp;
-//const timestampMs = req.body.timestamp * 1000;
-
-// Create a new Date object using the timestamp in milliseconds
-
-
-// Extract the different components of the date
-const year = timestamp_unix.substring(0,4);
-const month =timestamp_unix.substring(4, 6); // Months are 0-based
-const day = timestamp_unix.substring(6, 8);
-const hours = timestamp_unix.substring(8, 10);
-const minutes = timestamp_unix.substring(10, 12);
-const seconds = timestamp_unix.substring(12, 14);
-
-// Create a string representation of the date and time
-const timestamp = year+'-'+ month+'-'+day+' '+hours+':'+minutes+':'+seconds;
+const { timestamp } = parseTimestamp(timestamp_unix);
 const facility_details = await fetchData(mfl_code);
 if((isEmptyJSON(facility_details.facilities)==true) || (facility_details.facilities === undefined))
 {

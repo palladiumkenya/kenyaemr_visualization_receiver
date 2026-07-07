@@ -8,6 +8,7 @@ require('./passport-config')(passport);
 const logger = require("./logger");
 
 const receiver = require("./routes/receiver");
+const dataset = require("./routes/dataset");
 
 
 // app.use(express.json());
@@ -24,6 +25,8 @@ app.use((req, res, next) => {
 
 //verify upi
 app.use('/superset',receiver);
+
+app.use('/api/v2/dataset', dataset);
 
 
 
