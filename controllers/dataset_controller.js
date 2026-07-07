@@ -5,29 +5,39 @@ const logger = require("../logger");
 const { resolveFacility } = require("../utils/facility");
 const { parseTimestamp } = require("../utils/timestamp");
 const services = require("../services");
+const schemas = require("../schemas");
+const { envelopeSchema } = require("../schemas/envelope");
 const { Version } = require("../models/version");
 
 async function createDataset(req, res) {
-    const mfl_code = req.body.mfl_code;
-    const timestamp_unix = req.body.timestamp;
     const dataset_type = req.body.dataset_type;
-    const data = req.body.data;
 
-    // Validate dataset_type is present and supported
-    if (!dataset_type || typeof services[dataset_type] !== "function") {
+    // Validate dataset_type is present and supported (has both a service and a schema)
+    const dataSchema = schemas[dataset_type];
+    if (!dataset_type || typeof services[dataset_type] !== "function" || !dataSchema) {
         return res.status(400).json({
             success: false,
             msg: `Unknown or missing dataset_type: '${dataset_type}'`,
         });
     }
 
-    // Validate data payload
-    if (_.isEmpty(data)) {
+    // Validate the full payload (envelope + per-dataset_type data) with Zod.
+    // Map issues to their full dotted path so nested/missing fields are actionable
+    // (e.g. "data.2.schemes.0.statuses.1.count").
+    const parsed = envelopeSchema.extend({ data: dataSchema }).safeParse(req.body);
+    if (!parsed.success) {
+        const errors = parsed.error.issues.map((issue) => ({
+            field: issue.path.length ? issue.path.join(".") : "(root)",
+            message: issue.message,
+        }));
         return res.status(400).json({
             success: false,
-            msg: 'Missing or empty data payload',
+            msg: 'Payload validation failed',
+            errors,
         });
     }
+
+    const { mfl_code, timestamp: timestamp_unix, version, data } = parsed.data;
 
     const { timestamp } = parseTimestamp(timestamp_unix);
 
@@ -54,11 +64,11 @@ async function createDataset(req, res) {
     logger.debug('dataset_type: %s, facility_attributes: %o', dataset_type, facility_attributes);
 
     try {
-        if (!_.isEmpty(req.body.version)) {
+        if (!_.isEmpty(version)) {
             await Version.upsert({
                 ...facility_attributes,
-                version: req.body.version,
-                record_pk: base64.encode(mfl_code + timestamp_unix + req.body.version),
+                version: version,
+                record_pk: base64.encode(mfl_code + timestamp_unix + version),
             });
         }
 
