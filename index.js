@@ -11,9 +11,13 @@ const receiver = require("./routes/receiver");
 const dataset = require("./routes/dataset");
 
 
-app.use(bodyParser.json());
+// Raise the body-parser limit above the 100kb default; facility payloads can be
+// large. Configurable via BODY_LIMIT (default 50mb).
+const BODY_LIMIT = process.env.BODY_LIMIT || "50mb";
+app.use(bodyParser.json({ limit: BODY_LIMIT }));
 app.use(bodyParser.urlencoded({
-    extended: true
+    extended: true,
+    limit: BODY_LIMIT
 }));
 
 // Log all incoming requests at debug level
