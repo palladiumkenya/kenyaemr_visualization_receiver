@@ -22,7 +22,7 @@ function fetchData(mfl_code) {
         rejectUnauthorized: false
     };
     const fullUrl = `${process.env.HIS_LIST}${mfl_code}`;
-    logger.info(`Full HIS URL: ${fullUrl}`);
+    logger.debug(`Full HIS URL: ${fullUrl}`);
     return new Promise((resolve, reject) => {
 
         http.get(process.env.HIS_LIST + mfl_code, options, (response) => {
