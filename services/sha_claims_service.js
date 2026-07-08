@@ -8,7 +8,7 @@ const { ShaClaims } = require("../models/sha_claims");
 // Flatten the nested sha_claims payload into one row per
 // (claim_date, scheme_code, status) and upsert. Duplicate combinations within a
 // single payload collapse onto the same record_pk (last-wins).
-async function handle({ data, facility_attributes, mfl_code, timestamp, timestamp_unix }) {
+async function handle({ data, facility_attributes, mfl_code, hie_facility_id, timestamp, timestamp_unix }) {
     const rows = [];
 
     (data || []).forEach((entry) => {
@@ -20,6 +20,7 @@ async function handle({ data, facility_attributes, mfl_code, timestamp, timestam
                 rows.push({
                     timestamp: timestamp,
                     mfl_code: mfl_code,
+                    hie_facility_id: hie_facility_id,
                     county: facility_attributes.county,
                     sub_county: facility_attributes.sub_county,
                     facility_name: facility_attributes.facility_name,
