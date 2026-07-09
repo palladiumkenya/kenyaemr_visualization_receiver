@@ -6,9 +6,10 @@ const logger = require("../logger");
 const { ShaClaims } = require("../models/sha_claims");
 
 // Flatten the nested sha_claims payload into one row per
-// (claim_date, scheme_code, status) and upsert. Duplicate combinations within a
-// single payload collapse onto the same record_pk (last-wins).
-async function handle({ data, facility_attributes, mfl_code, timestamp, timestamp_unix }) {
+// (claim_date, scheme_code, status) and upsert. record_pk excludes the payload
+// timestamp, so re-submissions for the same claim_date overwrite the prior row
+// rather than accumulating a new one per submission.
+async function handle({ data, facility_attributes, mfl_code, hie_facility_id, timestamp }) {
     const rows = [];
 
     (data || []).forEach((entry) => {
@@ -20,6 +21,7 @@ async function handle({ data, facility_attributes, mfl_code, timestamp, timestam
                 rows.push({
                     timestamp: timestamp,
                     mfl_code: mfl_code,
+                    hie_facility_id: hie_facility_id,
                     county: facility_attributes.county,
                     sub_county: facility_attributes.sub_county,
                     facility_name: facility_attributes.facility_name,
@@ -28,7 +30,7 @@ async function handle({ data, facility_attributes, mfl_code, timestamp, timestam
                     status: status,
                     count: statusEntry.count || 0,
                     amount: statusEntry.amount || 0,
-                    record_pk: base64.encode(mfl_code + timestamp_unix + claim_date + scheme_code + status),
+                    record_pk: base64.encode(mfl_code + claim_date + scheme_code + status),
                 });
             });
         });
@@ -41,7 +43,9 @@ async function handle({ data, facility_attributes, mfl_code, timestamp, timestam
         if (_.isEmpty(rows) === false) {
             logger.debug('sha_claims rows: %o', rows);
             await ShaClaims.bulkCreate(rows, {
-                updateOnDuplicate: ['count', 'amount', 'claim_date', 'scheme_code', 'status']
+                // key fields (claim_date, scheme_code, status) are identical on
+                // collision; refresh the values and the submission timestamp
+                updateOnDuplicate: ['count', 'amount', 'timestamp', 'hie_facility_id']
             }, { transaction });
         }
 

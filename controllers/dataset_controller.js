@@ -37,7 +37,7 @@ async function createDataset(req, res) {
         });
     }
 
-    const { mfl_code, timestamp: timestamp_unix, version, data } = parsed.data;
+    const { mfl_code, hie_facility_id, timestamp: timestamp_unix, version, data } = parsed.data;
 
     const { timestamp } = parseTimestamp(timestamp_unix);
 
@@ -76,6 +76,7 @@ async function createDataset(req, res) {
             data,
             facility_attributes,
             mfl_code,
+            hie_facility_id,
             timestamp,
             timestamp_unix,
         });
