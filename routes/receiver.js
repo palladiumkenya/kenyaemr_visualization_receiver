@@ -4,8 +4,8 @@ const base64 = require("base64util");
 require("dotenv").config();
 const logger = require("../logger");
 
-const http = require('https');
-
+const { fetchData, isEmptyJSON } = require("../utils/facility");
+const { parseTimestamp } = require("../utils/timestamp");
 
 const router = express.Router();
 // const bcrypt = require("bcrypt");
@@ -33,42 +33,6 @@ const {BedManagement} = require("../models/bed_management");
 
 const {Version} = require("../models/version");
 const {ShaEnrollment} = require("../models/sha_enrollment");
-
-
-//Check Empty Json
-function isEmptyJSON(jsonObject) {
-    return JSON.stringify(jsonObject) === '{}' || JSON.stringify(jsonObject) === '[]';
-}
-
-//Pull Facility Locator Information ie Name, County & Sub County from HIS list
-function fetchData(mfl_code) {
-    const options = {
-        rejectUnauthorized: false
-      };
-    return new Promise((resolve, reject) => {
-        http.get(process.env.HIS_LIST+mfl_code,options, (response) => {
-            let data = '';
-
-            // A chunk of data has been received.
-            response.on('data', (chunk) => {
-                data += chunk;
-            });
-
-            // The whole response has been received.
-            response.on('end', () => {
-                try {
-                    const parsedData = JSON.parse(data);
-                    resolve(parsedData); // Resolve the promise with parsed data
-                } catch (error) {
-                    reject(error); // Reject the promise if parsing fails
-                }
-            });
-        }).on('error', (error) => {
-            reject(error); // Error making the request
-        });
-    });
-}
-
 
 
 // Function to add a new element to each record in the JSON array
@@ -293,23 +257,9 @@ router.post("/", async (req, res) => {
 //Receive Payload
 var mfl_code=req.body.mfl_code;
 
-// Convert the UNIX timestamp to milliseconds
+// Convert the compact timestamp into a formatted string
 const timestamp_unix = req.body.timestamp;
-//const timestampMs = req.body.timestamp * 1000;
-
-// Create a new Date object using the timestamp in milliseconds
-
-
-// Extract the different components of the date
-const year = timestamp_unix.substring(0,4);
-const month =timestamp_unix.substring(4, 6); // Months are 0-based
-const day = timestamp_unix.substring(6, 8);
-const hours = timestamp_unix.substring(8, 10);
-const minutes = timestamp_unix.substring(10, 12);
-const seconds = timestamp_unix.substring(12, 14);
-
-// Create a string representation of the date and time
-const timestamp = year+'-'+ month+'-'+day+' '+hours+':'+minutes+':'+seconds;
+const { timestamp } = parseTimestamp(timestamp_unix);
 const facility_details = await fetchData(mfl_code);
 if((isEmptyJSON(facility_details.facilities)==true) || (facility_details.facilities === undefined))
 {
@@ -568,8 +518,6 @@ logger.debug('facility_attributes: %o', facility_attributes);
     } else {
         var sha_enrollment_data = {};
     }
-
-    logger.debug('sha_enrollments: %o', req.body.sha_enrollments);
 
 visualizer_records(facility_attributes, visits_nested, workload, payments, inventory, diagnosis, billing, admissions,
      mortality, waittime, immunization, opd_visit_by_service_type, revenue_by_department, staff, waivers, opd_visits,

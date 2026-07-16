@@ -1,8 +1,8 @@
 const sequelize = require("../db_config");
 const Sequelize = require("sequelize");
 
-const OPD_Visits_Services = sequelize.sequelize.define(
-    "opd_visits", {
+const LoggedInUsersWithRoles = sequelize.sequelize.define(
+    "logged_in_users_with_roles", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -13,19 +13,19 @@ const OPD_Visits_Services = sequelize.sequelize.define(
         hie_facility_id: Sequelize.STRING,
         county: Sequelize.TEXT,
         sub_county: Sequelize.TEXT,
-        facility_name:Sequelize.TEXT,
-        service: Sequelize.TEXT,
-        total: Sequelize.BIGINT,
-           record_pk: {
+        facility_name: Sequelize.TEXT,
+        logged_in_users_with_roles: Sequelize.INTEGER,
+        total_active_users_with_roles: Sequelize.INTEGER,
+        record_pk: {
             type: Sequelize.STRING,
-            unique: true // Ensure uniqueness of usernames
-          },
-       }, {
+            unique: true // Ensure uniqueness of the composite key
+        },
+    }, {
         timestamps: true,
         paranoid: true,
         underscored: true,
         freezeTableName: true,
-        tableName: "opd_visits"
+        tableName: "logged_in_users_with_roles"
     }
 );
-exports.OPD_Visits_Services = OPD_Visits_Services;
+exports.LoggedInUsersWithRoles = LoggedInUsersWithRoles;

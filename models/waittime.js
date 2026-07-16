@@ -10,12 +10,15 @@ const Waittime = sequelize.sequelize.define(
         },
         timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
+        hie_facility_id: Sequelize.STRING,
         county: Sequelize.TEXT,
         sub_county: Sequelize.TEXT,
         facility_name:Sequelize.TEXT,
 
         queue: Sequelize.TEXT,
         average_wait_time: Sequelize.FLOAT,
+        total_wait_time: Sequelize.FLOAT,
+        patient_count: Sequelize.INTEGER,
         record_pk: {
             type: Sequelize.STRING,
             unique: true // Ensure uniqueness of usernames
