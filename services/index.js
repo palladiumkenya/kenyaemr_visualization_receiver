@@ -4,6 +4,7 @@ const workloadDepartment = require("./workload_department_service");
 const workload = require("./workload_service");
 const waitTime = require("./wait_time_service");
 const visits = require("./visits_service");
+const waivers = require("./waivers_service");
 
 // Registry of dataset services keyed by the payload's `dataset_type`.
 // Add new dataset types here as a single entry.
@@ -14,4 +15,5 @@ module.exports = {
     workload: workload.handle, // deprecated, replaced by workload_department
     wait_time: waitTime.handle,
     visits: visits.handle,
+    waivers: waivers.handle,
 };

@@ -4,6 +4,7 @@ const workloadDepartment = require("./workload_department");
 const workload = require("./workload");
 const waitTime = require("./wait_time");
 const visits = require("./visits");
+const waivers = require("./waivers");
 
 // Registry of per-dataset_type `data` schemas, keyed by dataset_type.
 // Add new dataset types here alongside their service.
@@ -14,4 +15,5 @@ module.exports = {
     workload: workload.schema, // deprecated, replaced by workload_department
     wait_time: waitTime.schema,
     visits: visits.schema,
+    waivers: waivers.schema,
 };
