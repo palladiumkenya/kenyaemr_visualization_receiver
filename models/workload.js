@@ -10,11 +10,13 @@ const Workload = sequelize.sequelize.define(
         },
         timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
+        hie_facility_id: Sequelize.STRING,
         county: Sequelize.TEXT,
         sub_county: Sequelize.TEXT,
         facility_name:Sequelize.TEXT,
 
         department: Sequelize.TEXT,
+        encounter_date: Sequelize.DATE,
         total: Sequelize.BIGINT,
         record_pk: {
             type: Sequelize.STRING,

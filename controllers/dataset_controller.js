@@ -37,7 +37,10 @@ async function createDataset(req, res) {
         });
     }
 
-    const { mfl_code, hie_facility_id, timestamp: timestamp_unix, version, data } = parsed.data;
+    const { mfl_code, hie_facility_id, timestamp: timestamp_unix, version, data: rawData } = parsed.data;
+
+    // Drop empty {} entries so services persist nothing for them.
+    const data = (rawData || []).filter((entry) => !_.isEmpty(entry));
 
     const { timestamp } = parseTimestamp(timestamp_unix);
 
