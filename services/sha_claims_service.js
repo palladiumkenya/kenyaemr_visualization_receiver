@@ -17,7 +17,9 @@ async function handle({ data, facility_attributes, mfl_code, hie_facility_id, ti
         (entry.schemes || []).forEach((scheme) => {
             const scheme_code = scheme.scheme_code;
             (scheme.statuses || []).forEach((statusEntry) => {
-                const status = statusEntry.status;
+                // status is nullish-tolerant; normalise so null and undefined
+                // produce the same record_pk and store as NULL.
+                const status = statusEntry.status ?? null;
                 rows.push({
                     timestamp: timestamp,
                     mfl_code: mfl_code,
@@ -30,7 +32,7 @@ async function handle({ data, facility_attributes, mfl_code, hie_facility_id, ti
                     status: status,
                     count: statusEntry.count || 0,
                     amount: statusEntry.amount || 0,
-                    record_pk: base64.encode(mfl_code + claim_date + scheme_code + status),
+                    record_pk: base64.encode(mfl_code + claim_date + scheme_code + (status ?? "")),
                 });
             });
         });

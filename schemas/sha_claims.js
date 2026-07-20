@@ -10,7 +10,7 @@ const shaClaimsDataSchema = z.array(
                 scheme_code: z.string().min(1),
                 statuses: z.array(
                     z.object({
-                        status: z.string().min(1),
+                        status: z.string().min(1).nullish(),
                         count: z.number().int().nonnegative(),
                         amount: z.number().nonnegative(),
                     })
