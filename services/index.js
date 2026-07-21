@@ -10,6 +10,7 @@ const diagnosis = require("./diagnosis_service");
 const immunization = require("./immunization_service");
 const inventory = require("./inventory_service");
 const mortality = require("./mortality_service");
+const payments = require("./payments_service");
 const { deprecated } = require("./deprecated_service");
 
 // Registry of dataset services keyed by the payload's `dataset_type`.
@@ -27,6 +28,7 @@ module.exports = {
     immunization: immunization.handle,
     inventory: inventory.handle,
     mortality: mortality.handle,
+    payments: payments.handle,
 
     // Deprecated dataset types — data ignored, nothing persisted.
     workload: deprecated("workload", "workload_department"),
