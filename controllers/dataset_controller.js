@@ -42,7 +42,8 @@ async function createDataset(req, res) {
     const { mfl_code, hie_facility_id, timestamp: timestamp_unix, version, data: rawData } = parsed.data;
 
     // Drop empty {} entries so services persist nothing for them.
-    const data = (rawData || []).filter((entry) => !_.isEmpty(entry));
+    // Some dataset_types send a scalar `data` (e.g. sha_enrollments); pass those through.
+    const data = Array.isArray(rawData) ? rawData.filter((entry) => !_.isEmpty(entry)) : rawData;
 
     const { timestamp } = parseTimestamp(timestamp_unix);
 
