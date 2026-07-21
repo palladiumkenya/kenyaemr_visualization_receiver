@@ -10,14 +10,16 @@ const { envelopeSchema } = require("../schemas/envelope");
 const { Version } = require("../models/version");
 
 async function createDataset(req, res) {
-    const dataset_type = req.body.dataset_type;
+    // dataset_type resolution is case-insensitive; registry keys are lower-case.
+    const rawDatasetType = req.body.dataset_type;
+    const dataset_type = typeof rawDatasetType === "string" ? rawDatasetType.toLowerCase() : rawDatasetType;
 
     // Validate dataset_type is present and supported (has both a service and a schema)
     const dataSchema = schemas[dataset_type];
     if (!dataset_type || typeof services[dataset_type] !== "function" || !dataSchema) {
         return res.status(400).json({
             success: false,
-            msg: `Unknown or missing dataset_type: '${dataset_type}'`,
+            msg: `Unknown or missing dataset_type: '${rawDatasetType}'`,
         });
     }
 

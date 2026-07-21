@@ -7,6 +7,7 @@ const waivers = require("./waivers");
 const wardAdmissions = require("./ward_admissions");
 const billing = require("./billing");
 const diagnosis = require("./diagnosis");
+const immunization = require("./immunization");
 const deprecated = require("./deprecated");
 
 // Registry of per-dataset_type `data` schemas, keyed by dataset_type.
@@ -21,6 +22,7 @@ module.exports = {
     ward_admissions: wardAdmissions.schema,
     billing: billing.schema,
     diagnosis: diagnosis.schema,
+    immunization: immunization.schema,
 
     // Deprecated dataset types — data ignored, nothing persisted.
     workload: deprecated.schema,
