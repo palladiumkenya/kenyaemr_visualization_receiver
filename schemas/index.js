@@ -12,6 +12,7 @@ const inventory = require("./inventory");
 const mortality = require("./mortality");
 const payments = require("./payments");
 const shaEnrollments = require("./sha_enrollments");
+const staffCount = require("./staff_count");
 const deprecated = require("./deprecated");
 
 // Registry of per-dataset_type `data` schemas, keyed by dataset_type.
@@ -31,6 +32,7 @@ module.exports = {
     mortality: mortality.schema,
     payments: payments.schema,
     sha_enrollments: shaEnrollments.schema,
+    staff_count: staffCount.schema,
 
     // Deprecated dataset types — data ignored, nothing persisted.
     workload: deprecated.schema,
