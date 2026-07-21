@@ -8,8 +8,8 @@ const inventoryDataSchema = z.array(
         item_name: z.string().min(1).optional(),
         item_type: z.string().min(1).optional(),
         unit_of_measure: z.string().min(1).optional(),
-        quantity_at_hand: z.coerce.number({ error: "quantity_at_hand must be a number" }).int().nonnegative().optional(),
-        quantity_consumed: z.coerce.number({ error: "quantity_consumed must be a number" }).int().nonnegative().optional(),
+        quantity_at_hand: z.coerce.number({ error: "quantity_at_hand must be a number" }).int().optional(),
+        quantity_consumed: z.coerce.number({ error: "quantity_consumed must be a number" }).int().optional(),
     })
 );
 
