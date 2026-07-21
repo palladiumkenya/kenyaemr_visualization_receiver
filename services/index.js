@@ -6,6 +6,7 @@ const visits = require("./visits_service");
 const waivers = require("./waivers_service");
 const wardAdmissions = require("./ward_admissions_service");
 const billing = require("./billing_service");
+const diagnosis = require("./diagnosis_service");
 const { deprecated } = require("./deprecated_service");
 
 // Registry of dataset services keyed by the payload's `dataset_type`.
@@ -19,6 +20,7 @@ module.exports = {
     waivers: waivers.handle,
     ward_admissions: wardAdmissions.handle,
     billing: billing.handle,
+    diagnosis: diagnosis.handle,
 
     // Deprecated dataset types — data ignored, nothing persisted.
     workload: deprecated("workload", "workload_department"),
