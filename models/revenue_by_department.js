@@ -10,6 +10,7 @@ const Revenue_by_department = sequelize.sequelize.define(
         },
         timestamp: Sequelize.TEXT,
         mfl_code: Sequelize.INTEGER,
+        hie_facility_id: Sequelize.STRING,
         county: Sequelize.TEXT,
         sub_county: Sequelize.TEXT,
         facility_name:Sequelize.TEXT,
