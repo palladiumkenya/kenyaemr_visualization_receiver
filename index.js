@@ -3,12 +3,11 @@ const app = express();
 const bodyParser = require("body-parser");
 require("express-async-errors");
 require("dotenv").config();
-const passport = require('passport');
-require('./passport-config')(passport);
 const logger = require("./logger");
 
 const receiver = require("./routes/receiver");
 const dataset = require("./routes/dataset");
+const spot = require("./routes/spot");
 
 
 // Raise the body-parser limit above the 100kb default; facility payloads can be
@@ -28,6 +27,7 @@ app.use((req, res, next) => {
 
 app.use('/superset',receiver);
 app.use('/api/v2/dataset', dataset);
+app.use('/spot', spot);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
